@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .variable import Function
+from .variable import Function, Variable
 
 
 class Square(Function):
@@ -30,3 +30,11 @@ class Exp(Function):
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
         grad_x = np.exp(self.x) * grad_y
         return grad_x
+
+
+def square(x: Variable) -> Variable:
+    return Square()(x)
+
+
+def exp(x: Variable) -> Variable:
+    return Exp()(x)

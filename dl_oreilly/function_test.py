@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square
+from .function import Exp, Square, exp, square
 from .variable import Variable
 
 
@@ -55,3 +55,17 @@ def test_backward_function() -> None:
 
     grad_w = z.backward()
     assert np.allclose(grad_w.data, exact(input))
+
+
+def test_functions() -> None:
+    # foward
+    x = Variable(np.array([0.5, 0]))
+    y = square(exp(square(x)))
+    assert np.allclose(y.data, np.array([1.648721270700128, 1]))
+
+    # backward
+    def exact(w: NDFloatArray) -> NDFloatArray:
+        return np.exp(w**2) ** 2 * w * 4
+
+    grad_x = y.backward()
+    assert np.allclose(grad_x.data, exact(x.data))

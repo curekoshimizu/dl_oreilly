@@ -13,8 +13,8 @@ class Variable:
         self._data = data
         self._creator: Optional[Function] = None
 
-    def backward(self, grad: Optional[NDFloatArray] = None) -> NDFloatArray:
-        grad = np.array([1.0])
+    def backward(self) -> NDFloatArray:
+        grad = np.ones_like(self.data)
         variable = self
         while True:
             f = variable.creator
