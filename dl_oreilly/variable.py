@@ -33,7 +33,8 @@ class Variable:
 
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
-                x.grad = grad
+                base = np.array(0.0) if x._grad is None else x._grad
+                x._grad = grad + base
             variables.extend(xs)
 
     @property

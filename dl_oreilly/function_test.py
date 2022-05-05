@@ -94,6 +94,20 @@ def test_add() -> None:
     assert z.data == 0.0
 
 
+def test_add_same_variable() -> None:
+    x = Variable(np.array(3))
+    y = add(x, x)
+    y.backward()
+    assert y.data == 6.0
+    assert x.grad == 2.0
+
+    x = Variable(np.array(3))
+    y = add(x, x, x, x)
+    y.backward()
+    assert y.data == 12.0
+    assert x.grad == 4.0
+
+
 def test_square_and_add() -> None:
     x = Variable(np.array(2.0))
     y = Variable(np.array(3.0))
