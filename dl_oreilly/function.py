@@ -1,29 +1,7 @@
-from abc import ABC, abstractmethod
-
 import numpy as np
 
 from . import NDFloatArray
-from .variable import Variable
-
-
-class Function(ABC):
-    def __call__(self, input: Variable) -> Variable:
-        self._input = input
-        x = input.data
-        y = self.forward(x)
-        return Variable(y)
-
-    @property
-    def x(self) -> NDFloatArray:
-        return self._input.data
-
-    @abstractmethod
-    def forward(self, x: NDFloatArray) -> NDFloatArray:
-        ...
-
-    @abstractmethod
-    def backward(self, x: NDFloatArray) -> NDFloatArray:
-        ...
+from .variable import Function
 
 
 class Square(Function):
