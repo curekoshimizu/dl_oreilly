@@ -1,7 +1,9 @@
+from functools import reduce
+
 import numpy as np
 
 from . import NDFloatArray
-from .variable import Function, Variable
+from .variable import Function, Variable, VariadicArgsFunction
 
 
 class Square(Function):
@@ -10,10 +12,7 @@ class Square(Function):
     f'(x) = 2x
     """
 
-    def forward(self, xs: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
-        return tuple(self._forward(x) for x in xs)
-
-    def _forward(self, x: NDFloatArray) -> NDFloatArray:
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
 
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
@@ -27,10 +26,7 @@ class Exp(Function):
     f'(x) = exp(x)
     """
 
-    def forward(self, xs: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
-        return tuple(self._forward(x) for x in xs)
-
-    def _forward(self, x: NDFloatArray) -> NDFloatArray:
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.exp(x)
 
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
@@ -38,14 +34,13 @@ class Exp(Function):
         return grad_x
 
 
-class Add(Function):
+class Add(VariadicArgsFunction):
     """
-    f(x, y) = x + y
+    f(x, y, z, ...) = x + y + z + ...
     """
 
-    def forward(self, x: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
-        x0, x1 = x
-        return (x0 + x1,)
+    def forward(self, xs: tuple[NDFloatArray, ...]) -> NDFloatArray:
+        return reduce(lambda x, y: x + y, xs)
 
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
         raise NotImplementedError()
