@@ -15,12 +15,13 @@ class Variable:
 
     def backward(self) -> NDFloatArray:
         grad = np.ones_like(self.data)
-        variable = self
-        while True:
+        variables: list[Variable] = [self]
+        while len(variables) > 0:
+            variable = variables.pop(0)
             f = variable.creator
             if f is None:
                 break
-            variable = f.input
+            variables.extend(f.inputs)
             grad = f.backward(grad)
 
         return grad
@@ -38,27 +39,28 @@ class Variable:
 
 
 class Function(ABC):
-    def __call__(self, input: Variable) -> Variable:
-        self._input = input
-        x = input.data
-        y = self.forward(x)
+    def __call__(self, *inputs: Variable) -> Variable:
+        self._inputs: tuple[Variable, ...] = inputs
+        xs: tuple[NDFloatArray, ...] = tuple(input.data for input in inputs)
+        ys: tuple[NDFloatArray, ...] = self.forward(xs)
 
-        output = Variable(y)
+        output = Variable(*ys)
         output.set_creator(self)
 
         self._output = output
         return output
 
     @property
-    def input(self) -> Variable:
-        return self._input
+    def inputs(self) -> tuple[Variable, ...]:
+        return self._inputs
 
     @property
     def x(self) -> NDFloatArray:
-        return self._input.data
+        assert len(self._inputs) == 1
+        return self._inputs[0].data
 
     @abstractmethod
-    def forward(self, x: NDFloatArray) -> NDFloatArray:
+    def forward(self, x: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
         ...
 
     @abstractmethod

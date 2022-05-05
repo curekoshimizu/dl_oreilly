@@ -10,7 +10,10 @@ class Square(Function):
     f'(x) = 2x
     """
 
-    def forward(self, x: NDFloatArray) -> NDFloatArray:
+    def forward(self, xs: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
+        return tuple(self._forward(x) for x in xs)
+
+    def _forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
 
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
@@ -24,12 +27,28 @@ class Exp(Function):
     f'(x) = exp(x)
     """
 
-    def forward(self, x: NDFloatArray) -> NDFloatArray:
+    def forward(self, xs: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
+        return tuple(self._forward(x) for x in xs)
+
+    def _forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.exp(x)
 
     def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
         grad_x = np.exp(self.x) * grad_y
         return grad_x
+
+
+class Add(Function):
+    """
+    f(x, y) = x + y
+    """
+
+    def forward(self, x: tuple[NDFloatArray, ...]) -> tuple[NDFloatArray, ...]:
+        x0, x1 = x
+        return (x0 + x1,)
+
+    def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
+        raise NotImplementedError()
 
 
 def square(x: Variable) -> Variable:
@@ -38,3 +57,7 @@ def square(x: Variable) -> Variable:
 
 def exp(x: Variable) -> Variable:
     return Exp()(x)
+
+
+def add(x: Variable, y: Variable) -> Variable:
+    return Add()(x, y)

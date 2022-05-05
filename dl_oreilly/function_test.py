@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, exp, square
+from .function import Exp, Square, add, exp, square
 from .variable import Variable
 
 
@@ -69,3 +69,10 @@ def test_functions() -> None:
 
     grad_x = y.backward()
     assert np.allclose(grad_x.data, exact(x.data))
+
+
+def test_add() -> None:
+    x = Variable(np.array(2))
+    y = Variable(np.array(3))
+    z = add(x, y)
+    assert z.data == 5.0
