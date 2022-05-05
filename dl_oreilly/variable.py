@@ -14,13 +14,15 @@ class Variable:
         self._creator: Optional[Function] = None
 
     def backward(self, grad: Optional[NDFloatArray] = None) -> NDFloatArray:
-        if grad is None:
-            grad = np.array([1.0])
-        f = self.creator
-        if f is not None:
-            x: Variable = f.input
-            grad_x: NDFloatArray = f.backward(grad)
-            return x.backward(grad_x)
+        grad = np.array([1.0])
+        variable = self
+        while True:
+            f = variable.creator
+            if f is None:
+                break
+            variable = f.input
+            grad = f.backward(grad)
+
         return grad
 
     def set_creator(self, f: Function) -> None:
