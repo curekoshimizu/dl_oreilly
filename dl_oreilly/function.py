@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
+import numpy as np
+
+from . import NDFloatArray
 from .variable import Variable
 
 
@@ -11,10 +13,15 @@ class Function(ABC):
         return Variable(y)
 
     @abstractmethod
-    def forward(self, x: Any) -> Any:
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
         ...
 
 
 class Square(Function):
-    def forward(self, x: Any) -> Any:
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
+
+
+class Exp(Function):
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.exp(x)
