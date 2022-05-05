@@ -116,3 +116,15 @@ def test_square_and_add() -> None:
     assert z.data == 13.0
     assert x.grad == 4.0
     assert y.grad == 6.0
+
+
+def test_clear_grad() -> None:
+    x = Variable(np.array(3.0))
+    y = add(x, x)
+    y.backward()
+    assert x.grad == 2.0
+
+    x.clear_grad()
+    y = add(add(x, x), x)
+    y.backward()
+    assert x.grad == 3.0

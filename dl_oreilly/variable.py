@@ -46,6 +46,9 @@ class Variable:
     def grad(self, grad: NDFloatArray) -> None:
         self._grad = grad
 
+    def clear_grad(self) -> None:
+        self._grad = None
+
     def set_creator(self, f: Union[Function, VariadicArgsFunction]) -> None:
         self._creator = f
 
