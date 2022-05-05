@@ -40,10 +40,10 @@ class Add(VariadicArgsFunction):
     """
 
     def forward(self, xs: tuple[NDFloatArray, ...]) -> NDFloatArray:
-        return reduce(lambda x, y: x + y, xs)
+        return reduce(lambda x, y: x + y, xs, np.array(0.0))
 
-    def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
-        raise NotImplementedError()
+    def backward(self, grad_y: NDFloatArray) -> tuple[NDFloatArray, ...]:
+        return tuple([grad_y] * len(self.inputs))
 
 
 def square(x: Variable) -> Variable:
@@ -54,5 +54,5 @@ def exp(x: Variable) -> Variable:
     return Exp()(x)
 
 
-def add(x: Variable, y: Variable) -> Variable:
-    return Add()(x, y)
+def add(*xs: Variable) -> Variable:
+    return Add()(*xs)
