@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 
@@ -9,10 +9,11 @@ from . import NDFloatArray
 
 
 class Variable:
-    def __init__(self, data: NDFloatArray) -> None:
+    def __init__(self, data: NDFloatArray, name: Optional[str] = None) -> None:
         self._data = data
         self._creator: Optional[Union[Function, VariadicArgsFunction]] = None
         self._grad: Optional[NDFloatArray] = None
+        self._name = name
 
     def backward(self) -> None:
         self.grad = np.ones_like(self.data)
@@ -59,6 +60,37 @@ class Variable:
     @property
     def creator(self) -> Optional[Union[Function, VariadicArgsFunction]]:
         return self._creator
+
+    @property
+    def name(self) -> Optional[str]:
+        return self._name
+
+    @name.setter
+    def name(self, name: str) -> None:
+        self._name = name
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        return self.data.shape
+
+    @property
+    def ndim(self) -> int:
+        return self.data.ndim
+
+    @property
+    def size(self) -> int:
+        return self.data.size
+
+    @property
+    def dtype(self) -> np.dtype[Any]:
+        return self.data.dtype
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __repr__(self) -> str:
+        name = "" if self.name is None else f"{self.name}:"
+        return f"variable({name}{self.data})"
 
 
 class Function(ABC):
