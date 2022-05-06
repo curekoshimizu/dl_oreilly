@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from . import NDFloatArray
 from .function import Exp, Square, add, exp, square
@@ -87,11 +88,8 @@ def test_add() -> None:
     w = Variable(np.array(1))
     x = Variable(np.array(2))
     y = Variable(np.array(3))
-    z = add(w, x, y)
+    z = add(add(w, x), y)
     assert z.data == 6.0
-
-    z = add()
-    assert z.data == 0.0
 
 
 def test_add_same_variable() -> None:
@@ -101,8 +99,10 @@ def test_add_same_variable() -> None:
     assert y.data == 6.0
     assert x.grad == 2.0
 
+@pytest.mark.xfail(reason="implement generation")
+def test_add_same_variable_2() -> None:
     x = Variable(np.array(3))
-    y = add(x, x, x, x)
+    y = add(add(add(x, x), x), x)
     y.backward()
     assert y.data == 12.0
     assert x.grad == 4.0

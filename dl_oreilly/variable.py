@@ -11,7 +11,7 @@ from . import NDFloatArray
 class Variable:
     def __init__(self, data: NDFloatArray, name: Optional[str] = None) -> None:
         self._data = data
-        self._creator: Optional[Union[Function, VariadicArgsFunction]] = None
+        self._creator: Optional[Union[Function, TwoArgsFunction]] = None
         self._grad: Optional[NDFloatArray] = None
         self._name = name
 
@@ -50,7 +50,7 @@ class Variable:
     def clear_grad(self) -> None:
         self._grad = None
 
-    def set_creator(self, f: Union[Function, VariadicArgsFunction]) -> None:
+    def set_creator(self, f: Union[Function, TwoArgsFunction]) -> None:
         self._creator = f
 
     @property
@@ -58,7 +58,7 @@ class Variable:
         return self._data
 
     @property
-    def creator(self) -> Optional[Union[Function, VariadicArgsFunction]]:
+    def creator(self) -> Optional[Union[Function, TwoArgsFunction]]:
         return self._creator
 
     @property
@@ -125,11 +125,10 @@ class Function(ABC):
         ...
 
 
-class VariadicArgsFunction(ABC):
-    def __call__(self, *inputs: Variable) -> Variable:
-        self._inputs: tuple[Variable, ...] = inputs
-        xs: tuple[NDFloatArray, ...] = tuple(input.data for input in inputs)
-        y = self.forward(xs)
+class TwoArgsFunction(ABC):
+    def __call__(self, x1: Variable, x2: Variable) -> Variable:
+        self._inputs = (x1, x2)
+        y = self.forward(x1.data, x2.data)
 
         output = Variable(y)
         output.set_creator(self)
@@ -138,18 +137,17 @@ class VariadicArgsFunction(ABC):
         return output
 
     @property
-    def inputs(self) -> tuple[Variable, ...]:
+    def inputs(self) -> tuple[Variable, Variable]:
         return self._inputs
 
     @property
-    def x(self) -> NDFloatArray:
-        assert len(self._inputs) == 1
-        return self._inputs[0].data
+    def xs(self) -> tuple[NDFloatArray, NDFloatArray]:
+        return (self._inputs[0].data, self._inputs[1].data)
 
     @abstractmethod
-    def forward(self, x: tuple[NDFloatArray, ...]) -> NDFloatArray:
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         ...
 
     @abstractmethod
-    def backward(self, x: NDFloatArray) -> tuple[NDFloatArray, ...]:
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
         ...

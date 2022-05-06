@@ -1,9 +1,7 @@
-from functools import reduce
-
 import numpy as np
 
 from . import NDFloatArray
-from .variable import Function, Variable, VariadicArgsFunction
+from .variable import Function, TwoArgsFunction, Variable
 
 
 class Square(Function):
@@ -34,16 +32,29 @@ class Exp(Function):
         return grad_x
 
 
-class Add(VariadicArgsFunction):
+class Add(TwoArgsFunction):
     """
-    f(x, y, z, ...) = x + y + z + ...
+    f(x, y) = x + y
     """
 
-    def forward(self, xs: tuple[NDFloatArray, ...]) -> NDFloatArray:
-        return reduce(lambda x, y: x + y, xs, np.array(0.0))
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        return x + y
 
-    def backward(self, grad_y: NDFloatArray) -> tuple[NDFloatArray, ...]:
-        return tuple([grad_y] * len(self.inputs))
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+        return (grad, grad)
+
+
+class Mul(TwoArgsFunction):
+    """
+    f(x, y) = x * y
+    """
+
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        return x * y
+
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+        x1, x2 = self.xs
+        return (grad * x2, grad * x1)
 
 
 def square(x: Variable) -> Variable:
@@ -54,5 +65,9 @@ def exp(x: Variable) -> Variable:
     return Exp()(x)
 
 
-def add(*xs: Variable) -> Variable:
-    return Add()(*xs)
+def add(x1: Variable, x2: Variable) -> Variable:
+    return Add()(x1, x2)
+
+
+def mul(x1: Variable, x2: Variable) -> Variable:
+    return Mul()(x1, x2)
