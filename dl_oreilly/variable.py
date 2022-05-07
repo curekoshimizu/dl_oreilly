@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import heapq
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Protocol
 
@@ -124,11 +125,14 @@ class ComparableFunction:
 
     def __eq__(self, other: Any) -> bool:
         assert isinstance(other, ComparableFunction)
-        return self.function == other.function
+        return self.generation == other.generation
 
     def __lt__(self, other: Any) -> bool:
+        """
+        reverse order of generation
+        """
         assert isinstance(other, ComparableFunction)
-        return (self.generation, id(self.function)) < (other.generation, id(other.function))
+        return self.generation > other.generation
 
 
 class Function(Protocol):
@@ -159,6 +163,32 @@ class DummyFunction:
 
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
         raise NotImplementedError()
+
+
+class _FunctionPriorityQueue:
+    """
+    used for Variable'backward implementation
+    """
+
+    def __init__(self) -> None:
+        self._set: set[Function] = set()
+        self._list: list[ComparableFunction] = []
+
+    def register(self, f: Function) -> bool:
+        if f in self._set:
+            # already registered
+            return False
+
+        self._set.add(f)
+        heapq.heappush(self._list, ComparableFunction(f))
+        return True
+
+    def pop(self) -> Function:
+        ret = heapq.heappop(self._list)
+        return ret.function
+
+    def is_empty(self) -> bool:
+        return len(self._list) == 0
 
 
 class OneArgFunction(ABC):
