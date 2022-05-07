@@ -14,6 +14,7 @@ class Variable:
         self._creator: Optional[Union[Function, TwoArgsFunction]] = None
         self._grad: Optional[NDFloatArray] = None
         self._name = name
+        self._generation = 0
 
     def backward(self) -> None:
         self.grad = np.ones_like(self.data)
@@ -67,6 +68,11 @@ class Variable:
 
     def set_creator(self, f: Union[Function, TwoArgsFunction]) -> None:
         self._creator = f
+        self._generation = f.generation + 1
+
+    @property
+    def generation(self) -> int:
+        return self._generation
 
     @property
     def data(self) -> NDFloatArray:
@@ -111,6 +117,7 @@ class Variable:
 class Function(ABC):
     def __call__(self, input: Variable) -> Variable:
         self._input = input
+        self._generation = input.generation
         y = self.forward(input.data)
 
         output = Variable(y)
@@ -118,6 +125,10 @@ class Function(ABC):
 
         self._output = output
         return output
+
+    @property
+    def generation(self) -> int:
+        return self._generation
 
     @property
     def input(self) -> Variable:
@@ -143,6 +154,7 @@ class Function(ABC):
 class TwoArgsFunction(ABC):
     def __call__(self, x1: Variable, x2: Variable) -> Variable:
         self._inputs = (x1, x2)
+        self._generation = max(x1.generation, x2.generation)
         y = self.forward(x1.data, x2.data)
 
         output = Variable(y)
@@ -150,6 +162,10 @@ class TwoArgsFunction(ABC):
 
         self._output = output
         return output
+
+    @property
+    def generation(self) -> int:
+        return self._generation
 
     @property
     def inputs(self) -> tuple[Variable, Variable]:

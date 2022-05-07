@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from . import NDFloatArray
 from .function import Exp, Square, add, exp, mul, square
