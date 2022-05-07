@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from . import NDFloatArray
+from .config import Config
 from .protocol import Variable
 
 
@@ -10,13 +11,14 @@ class OneArgFunction(ABC):
     def __call__(self, input: Variable) -> Variable:
         self._input = input
         assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
-        self._generation = input.generation
         y = self.forward(input.data)
 
         output = input.new_variable(y)
-        output.creator = self
 
-        self._output = output
+        if Config.enable_backprop:
+            self._generation = input.generation
+            output.creator = self
+            self._output = output
         return output
 
     @property
@@ -55,13 +57,14 @@ class TwoArgsFunction(ABC):
     def __call__(self, x1: Variable, x2: Variable) -> Variable:
         self._inputs = (x1, x2)
         assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
-        self._generation = max(x1.generation, x2.generation)
         y = self.forward(x1.data, x2.data)
 
         output = x1.new_variable(y)
-        output.creator = self
 
-        self._output = output
+        if Config.enable_backprop:
+            self._generation = max(x1.generation, x2.generation)
+            output.creator = self
+            self._output = output
         return output
 
     @property
