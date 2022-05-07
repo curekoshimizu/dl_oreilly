@@ -1,4 +1,4 @@
-from .variable import DummyFunction, _ComparableFunction, _FunctionPriorityQueue
+from .backward_helper import DummyFunction, _ComparableFunction, _FunctionPriorityQueue
 
 
 def test_comparable_function() -> None:
