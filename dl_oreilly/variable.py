@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import heapq
-from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 import numpy as np
@@ -178,89 +177,3 @@ class _FunctionPriorityQueue:
 
     def is_empty(self) -> bool:
         return len(self._list) == 0
-
-
-class OneArgFunction(ABC):
-    def __call__(self, input: Variable) -> Variable:
-        self._input = input
-        assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
-        self._generation = input.generation
-        y = self.forward(input.data)
-
-        output = input.new_variable(y)
-        output.creator = self
-
-        self._output = output
-        return output
-
-    @property
-    def generation(self) -> int:
-        return self._generation
-
-    @property
-    def input(self) -> Variable:
-        return self._input
-
-    @property
-    def output(self) -> Variable:
-        return self._output
-
-    @property
-    def inputs(self) -> tuple[Variable, ...]:
-        return (self._input,)
-
-    @property
-    def x(self) -> NDFloatArray:
-        return self._input.data
-
-    @abstractmethod
-    def forward(self, x: NDFloatArray) -> NDFloatArray:
-        ...
-
-    @abstractmethod
-    def _backward_core(self, x: NDFloatArray) -> NDFloatArray:
-        ...
-
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
-        return (self._backward_core(grad),)
-
-
-class TwoArgsFunction(ABC):
-    def __call__(self, x1: Variable, x2: Variable) -> Variable:
-        self._inputs = (x1, x2)
-        assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
-        self._generation = max(x1.generation, x2.generation)
-        y = self.forward(x1.data, x2.data)
-
-        output = x1.new_variable(y)
-        output.creator = self
-
-        self._output = output
-        return output
-
-    @property
-    def generation(self) -> int:
-        return self._generation
-
-    @property
-    def inputs(self) -> tuple[Variable, Variable]:
-        return self._inputs
-
-    @property
-    def xs(self) -> tuple[NDFloatArray, NDFloatArray]:
-        return (self._inputs[0].data, self._inputs[1].data)
-
-    @property
-    def output(self) -> Variable:
-        return self._output
-
-    @abstractmethod
-    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
-        ...
-
-    @abstractmethod
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
-        ...
-
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
-        return self._backward_core(grad)
