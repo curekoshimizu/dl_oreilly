@@ -1,5 +1,6 @@
 import numpy as np
 
+from .protocol import Variable
 from .variable import Var
 
 
@@ -82,3 +83,41 @@ def test_operation_pow() -> None:
     y.backward()
     assert y.data == 8.0
     assert x.grad == 12.0
+
+
+def test_sphere() -> None:
+    def sphere(x: Variable, y: Variable) -> Variable:
+        return x**2 + y**2
+
+    x = Var(np.array(1.0))
+    y = Var(np.array(1.0))
+    z = sphere(x, y)
+    z.backward()
+    assert x.grad == 2.0
+    assert y.grad == 2.0
+
+
+def test_matyas() -> None:
+    def matyas(x: Variable, y: Variable) -> Variable:
+        return 0.26 * (x**2 + y**2) - 0.48 * x * y
+
+    x = Var(np.array(1.0))
+    y = Var(np.array(1.0))
+    z = matyas(x, y)
+    z.backward()
+    assert x.grad == 0.040000000000000036
+    assert y.grad == 0.040000000000000036
+
+
+def test_goldstein_price() -> None:
+    def f(x: Variable, y: Variable) -> Variable:
+        return (1 + (x + y + 1) ** 2 * (19 - 14 * x + 3 * x**2 - 14 * y + 6 * x * y + 3 * y * y)) * (
+            30 + (2 * x - 3 * y) ** 2 * (18 - 32 * x + 12 * x**2 + 48 * y - 36 * x * y + 27 * y * y)
+        )
+
+    x = Var(np.array(1.0))
+    y = Var(np.array(1.0))
+    z = f(x, y)
+    z.backward()
+    assert x.grad == -5376.0
+    assert y.grad == 8064.0
