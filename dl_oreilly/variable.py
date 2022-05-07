@@ -37,18 +37,26 @@ class Var(Variable):
                 if f is not None:
                     queue.register(f)
 
-    def __mul__(self, other: Variable | NDFloatArray) -> Variable:
+    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
         if not isinstance(other, Variable):
             other = Var(other)
         return mul(self, other)
 
-    def __add__(self, other: Variable | NDFloatArray) -> Variable:
+    def __add__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
         if not isinstance(other, Variable):
             other = Var(other)
         return add(self, other)
 
-    def __rmul__(self, other: NDFloatArray) -> Variable:
+    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
         return mul(self, Var(other))
 
-    def __radd__(self, other: NDFloatArray) -> Variable:
+    def __radd__(self, other: NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
         return add(self, Var(other))

@@ -13,13 +13,35 @@ def test_variable() -> None:
     assert repr(x) == "variable(x:[1. 2.])"
 
 
-def test_operation() -> None:
+def test_operation_1() -> None:
     x = Var(np.array(3.0), name="x")
     y = Var(np.array(2.0), name="y")
-    z = Var(np.array(1.0), name="y")
+    z = Var(np.array(1.0), name="z")
 
     w = x * y + z
     w.backward()
     assert w.data == 7.0
     assert x.grad == 2.0
     assert y.grad == 3.0
+
+
+def test_operation_2() -> None:
+    x = Var(np.array(3.0), name="x")
+    y = 2.0
+    z = 1.0
+
+    w = x * y + z
+    w.backward()
+    assert w.data == 7.0
+    assert x.grad == 2.0
+
+
+def test_operation_3() -> None:
+    x = Var(np.array(3.0), name="x")
+    y = 2.0
+    z = 1.0
+
+    w = z + y * x
+    w.backward()
+    assert w.data == 7.0
+    assert x.grad == 2.0

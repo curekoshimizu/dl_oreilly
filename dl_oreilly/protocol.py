@@ -106,17 +106,17 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def __mul__(self, other: Variable | NDFloatArray) -> Variable:
+    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         ...
 
     @abstractmethod
-    def __add__(self, other: Variable | NDFloatArray) -> Variable:
+    def __add__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         ...
 
     @abstractmethod
-    def __rmul__(self, other: NDFloatArray) -> Variable:
+    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
         ...
 
     @abstractmethod
-    def __radd__(self, other: NDFloatArray) -> Variable:
+    def __radd__(self, other: NDFloatArray | float | int) -> Variable:
         ...
