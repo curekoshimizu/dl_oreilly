@@ -1,10 +1,10 @@
 import numpy as np
 
 from . import NDFloatArray
-from .variable import Function, TwoArgsFunction, Variable
+from .variable import OneArgFunction, TwoArgsFunction, Variable
 
 
-class Square(Function):
+class Square(OneArgFunction):
     """
     f(x) = x^2
     f'(x) = 2x
@@ -13,12 +13,12 @@ class Square(Function):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
 
-    def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
+    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
         grad_x = (2 * self.x) * grad_y
         return grad_x
 
 
-class Exp(Function):
+class Exp(OneArgFunction):
     """
     f(x) = exp(x)
     f'(x) = exp(x)
@@ -27,7 +27,7 @@ class Exp(Function):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.exp(x)
 
-    def backward(self, grad_y: NDFloatArray) -> NDFloatArray:
+    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
         grad_x = np.exp(self.x) * grad_y
         return grad_x
 
@@ -40,7 +40,7 @@ class Add(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x + y
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
         return (grad, grad)
 
 
@@ -52,7 +52,7 @@ class Mul(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x * y
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
         x1, x2 = self.xs
         return (grad * x2, grad * x1)
 

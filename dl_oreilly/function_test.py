@@ -30,9 +30,9 @@ def test_call_three_functions() -> None:
         return np.exp(w**2) ** 2 * w * 4
 
     grad_w = np.array([1.0])
-    grad_x = h.backward(grad_w)
-    grad_y = g.backward(grad_x)
-    grad_z = f.backward(grad_y)
+    grad_x = h.backward(grad_w)[0]
+    grad_y = g.backward(grad_x)[0]
+    grad_z = f.backward(grad_y)[0]
     assert np.allclose(grad_z.data, exact(input))
 
 

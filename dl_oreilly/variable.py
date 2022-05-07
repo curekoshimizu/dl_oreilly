@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any, Optional, Protocol, Union
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from . import NDFloatArray
 class Variable:
     def __init__(self, data: NDFloatArray, name: Optional[str] = None) -> None:
         self._data = data
-        self._creator: Optional[Union[Function, TwoArgsFunction]] = None
+        self._creator: Optional[Union[OneArgFunction, TwoArgsFunction]] = None
         self._grad: Optional[NDFloatArray] = None
         self._name = name
         self._generation = 0
@@ -20,7 +20,7 @@ class Variable:
         self.grad = np.ones_like(self.data)
         variables: list[Variable] = [self]
 
-        # funcs: list[ Union[Function, TwoArgsFunction]] = []
+        # funcs: list[ Union[OneArgFunction, TwoArgsFunction]] = []
         # f = self.creator
         # if f is not None:
         #     funcs.append(f)
@@ -42,11 +42,7 @@ class Variable:
 
             xs = f.inputs
             grads: tuple[NDFloatArray, ...]
-            if isinstance(f, Function):
-                grads = (f.backward(variable.grad),)
-            else:
-                grads = f.backward(variable.grad)
-
+            grads = f.backward(variable.grad)
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
                 base = np.array(0.0) if x._grad is None else x._grad
@@ -66,7 +62,7 @@ class Variable:
     def clear_grad(self) -> None:
         self._grad = None
 
-    def set_creator(self, f: Union[Function, TwoArgsFunction]) -> None:
+    def set_creator(self, f: Union[OneArgFunction, TwoArgsFunction]) -> None:
         self._creator = f
         self._generation = f.generation + 1
 
@@ -79,7 +75,7 @@ class Variable:
         return self._data
 
     @property
-    def creator(self) -> Optional[Union[Function, TwoArgsFunction]]:
+    def creator(self) -> Optional[Union[OneArgFunction, TwoArgsFunction]]:
         return self._creator
 
     @property
@@ -114,7 +110,34 @@ class Variable:
         return f"variable({name}{self.data})"
 
 
-class Function(ABC):
+class ComparableFunction:
+    def __init__(self, f: Union[OneArgFunction, TwoArgsFunction]) -> None:
+        self._f = f
+
+    @property
+    def generation(self) -> int:
+        return self._f.generation
+
+    @property
+    def function(self) -> Union[OneArgFunction, TwoArgsFunction]:
+        return self._f
+
+
+class Function(Protocol):
+    @property
+    def generation(self) -> int:
+        ...
+
+    @property
+    def inputs(self) -> tuple[Variable, ...]:
+        ...
+
+    @abstractmethod
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+        ...
+
+
+class OneArgFunction(ABC):
     def __call__(self, input: Variable) -> Variable:
         self._input = input
         assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
@@ -148,8 +171,11 @@ class Function(ABC):
         ...
 
     @abstractmethod
-    def backward(self, x: NDFloatArray) -> NDFloatArray:
+    def _backward_core(self, x: NDFloatArray) -> NDFloatArray:
         ...
+
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+        return (self._backward_core(grad),)
 
 
 class TwoArgsFunction(ABC):
@@ -182,5 +208,8 @@ class TwoArgsFunction(ABC):
         ...
 
     @abstractmethod
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
         ...
+
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+        return self._backward_core(grad)
