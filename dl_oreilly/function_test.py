@@ -2,11 +2,11 @@ import numpy as np
 
 from . import NDFloatArray
 from .function import Exp, Square, add, exp, mul, square
-from .variable import Variable
+from .variable import Var
 
 
 def test_square() -> None:
-    x = Variable(np.array([10, 20]))
+    x = Var(np.array([10, 20]))
     f = Square()
     y = f(x)
     assert np.all(y.data == np.array([100, 400]))
@@ -19,7 +19,7 @@ def test_call_three_functions() -> None:
     h = Square()
 
     input = np.array([0.5, 0])
-    w = Variable(input)
+    w = Var(input)
     x = f(w)
     y = g(x)
     z = h(y)
@@ -43,7 +43,7 @@ def test_backward_function() -> None:
     h = Square()
 
     input = np.array([0.5, 0])
-    w = Variable(input)
+    w = Var(input)
     x = f(w)
     y = g(x)
     z = h(y)
@@ -59,7 +59,7 @@ def test_backward_function() -> None:
 
 def test_functions() -> None:
     # forward
-    x = Variable(np.array([0.5, 0]))
+    x = Var(np.array([0.5, 0]))
     y = square(exp(square(x)))
     assert np.allclose(y.data, np.array([1.648721270700128, 1]))
 
@@ -73,8 +73,8 @@ def test_functions() -> None:
 
 def test_add() -> None:
     # forward
-    x = Variable(np.array(2))
-    y = Variable(np.array(3))
+    x = Var(np.array(2))
+    y = Var(np.array(3))
     z = add(x, y)
     assert z.data == 5.0
 
@@ -84,15 +84,15 @@ def test_add() -> None:
     assert y.grad == 1.0
 
     # forward
-    w = Variable(np.array(1))
-    x = Variable(np.array(2))
-    y = Variable(np.array(3))
+    w = Var(np.array(1))
+    x = Var(np.array(2))
+    y = Var(np.array(3))
     z = add(add(w, x), y)
     assert z.data == 6.0
 
 
 def test_add_same_variable() -> None:
-    x = Variable(np.array(3))
+    x = Var(np.array(3))
     y = add(x, x)
     y.backward()
     assert y.data == 6.0
@@ -101,7 +101,7 @@ def test_add_same_variable() -> None:
 
 # @pytest.mark.xfail(reason="implement generation")
 def test_add_same_variable_2() -> None:
-    x = Variable(np.array(3), name="x")
+    x = Var(np.array(3), name="x")
     a = add(x, x)
     a.name = "a"
     b = add(a, x)
@@ -112,7 +112,7 @@ def test_add_same_variable_2() -> None:
     assert y.data == 12.0
     assert x.grad == 4.0
 
-    w = Variable(np.array(3), "w")
+    w = Var(np.array(3), "w")
     z = add(add(add(w, w), w), w)
     z.name = "z"
     z.backward()
@@ -121,8 +121,8 @@ def test_add_same_variable_2() -> None:
 
 
 def test_square_and_add() -> None:
-    x = Variable(np.array(2.0))
-    y = Variable(np.array(3.0))
+    x = Var(np.array(2.0))
+    y = Var(np.array(3.0))
     z = add(square(x), square(y))
     z.backward()
     assert z.data == 13.0
@@ -131,7 +131,7 @@ def test_square_and_add() -> None:
 
 
 def test_clear_grad() -> None:
-    x = Variable(np.array(3.0))
+    x = Var(np.array(3.0))
     y = add(x, x)
     y.backward()
     assert x.grad == 2.0
@@ -143,9 +143,9 @@ def test_clear_grad() -> None:
 
 
 def test_mul() -> None:
-    x = Variable(np.array(3.0))
-    y = Variable(np.array(2.0))
-    z = Variable(np.array(1.0))
+    x = Var(np.array(3.0))
+    y = Var(np.array(2.0))
+    z = Var(np.array(1.0))
     w = add(mul(x, y), z)
     w.backward()
     assert w.data == 7.0
@@ -154,7 +154,7 @@ def test_mul() -> None:
 
 
 def test_generateion() -> None:
-    x = Variable(np.array(2.0), name="x")
+    x = Var(np.array(2.0), name="x")
     a = square(x)
     a.name = "a"
     b = square(a)

@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import heapq
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Protocol
+from typing import Any, Optional
 
 import numpy as np
 
 from . import NDFloatArray
+from .protocol import Function, Variable
 
 
-class Variable:
+class Var:
     def __init__(self, data: NDFloatArray, name: Optional[str] = None) -> None:
         self._data = data
         self._creator: Optional[Function] = None
@@ -30,11 +31,20 @@ class Variable:
             grads = f.backward(f.output.grad)
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
-                base = np.array(0.0) if x._grad is None else x._grad
-                x._grad = grad + base
+                pre_grad = x.optional_grad
+                base = np.array(0.0) if pre_grad is None else pre_grad
+                x.grad = grad + base
                 f = x.creator
                 if f is not None:
                     queue.register(f)
+
+    def set_creator(self, f: Function) -> None:
+        self._creator = f
+        self._generation = f.generation + 1
+
+    @property
+    def optional_grad(self) -> Optional[NDFloatArray]:
+        return self._grad
 
     @property
     def grad(self) -> NDFloatArray:
@@ -47,10 +57,6 @@ class Variable:
 
     def clear_grad(self) -> None:
         self._grad = None
-
-    def set_creator(self, f: Function) -> None:
-        self._creator = f
-        self._generation = f.generation + 1
 
     @property
     def generation(self) -> int:
@@ -124,24 +130,6 @@ class _ComparableFunction:
         return self.generation > other.generation
 
 
-class Function(Protocol):
-    @property
-    def generation(self) -> int:
-        ...
-
-    @property
-    def inputs(self) -> tuple[Variable, ...]:
-        ...
-
-    @property
-    def output(self) -> Variable:
-        ...
-
-    @abstractmethod
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
-        ...
-
-
 class DummyFunction:
     def __init__(self, generation: int) -> None:
         self._generation = generation
@@ -195,7 +183,7 @@ class OneArgFunction(ABC):
         self._generation = input.generation
         y = self.forward(input.data)
 
-        output = Variable(y)
+        output = Var(y)
         output.set_creator(self)
 
         self._output = output
@@ -240,7 +228,7 @@ class TwoArgsFunction(ABC):
         self._generation = max(x1.generation, x2.generation)
         y = self.forward(x1.data, x2.data)
 
-        output = Variable(y)
+        output = Var(y)
         output.set_creator(self)
 
         self._output = output
