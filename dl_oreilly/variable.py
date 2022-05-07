@@ -111,7 +111,11 @@ class Variable:
         return f"variable({name}{self.data})"
 
 
-class ComparableFunction:
+class _ComparableFunction:
+    """
+    used for Variable'backward implementation
+    """
+
     def __init__(self, f: Function) -> None:
         self._f = f
 
@@ -124,14 +128,14 @@ class ComparableFunction:
         return self._f
 
     def __eq__(self, other: Any) -> bool:
-        assert isinstance(other, ComparableFunction)
+        assert isinstance(other, _ComparableFunction)
         return self.generation == other.generation
 
     def __lt__(self, other: Any) -> bool:
         """
         reverse order of generation
         """
-        assert isinstance(other, ComparableFunction)
+        assert isinstance(other, _ComparableFunction)
         return self.generation > other.generation
 
 
@@ -172,7 +176,7 @@ class _FunctionPriorityQueue:
 
     def __init__(self) -> None:
         self._set: set[Function] = set()
-        self._list: list[ComparableFunction] = []
+        self._list: list[_ComparableFunction] = []
 
     def register(self, f: Function) -> bool:
         if f in self._set:
@@ -180,7 +184,7 @@ class _FunctionPriorityQueue:
             return False
 
         self._set.add(f)
-        heapq.heappush(self._list, ComparableFunction(f))
+        heapq.heappush(self._list, _ComparableFunction(f))
         return True
 
     def pop(self) -> Function:

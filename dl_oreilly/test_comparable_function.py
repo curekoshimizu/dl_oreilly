@@ -1,4 +1,4 @@
-from .variable import ComparableFunction, DummyFunction, _FunctionPriorityQueue
+from .variable import DummyFunction, _ComparableFunction, _FunctionPriorityQueue
 
 
 def test_comparable_function() -> None:
@@ -6,9 +6,9 @@ def test_comparable_function() -> None:
     g = DummyFunction(2)
     h = DummyFunction(2)
 
-    x = ComparableFunction(f)
-    y = ComparableFunction(g)
-    z = ComparableFunction(h)
+    x = _ComparableFunction(f)
+    y = _ComparableFunction(g)
+    z = _ComparableFunction(h)
 
     assert x > y
     assert x > z
