@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Optional, Protocol
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from . import NDFloatArray
 class Variable:
     def __init__(self, data: NDFloatArray, name: Optional[str] = None) -> None:
         self._data = data
-        self._creator: Optional[Union[OneArgFunction, TwoArgsFunction]] = None
+        self._creator: Optional[Function] = None
         self._grad: Optional[NDFloatArray] = None
         self._name = name
         self._generation = 0
@@ -20,7 +20,7 @@ class Variable:
         self.grad = np.ones_like(self.data)
         variables: list[Variable] = [self]
 
-        # funcs: list[ Union[OneArgFunction, TwoArgsFunction]] = []
+        # funcs: list[ Function] = []
         # f = self.creator
         # if f is not None:
         #     funcs.append(f)
@@ -62,7 +62,7 @@ class Variable:
     def clear_grad(self) -> None:
         self._grad = None
 
-    def set_creator(self, f: Union[OneArgFunction, TwoArgsFunction]) -> None:
+    def set_creator(self, f: Function) -> None:
         self._creator = f
         self._generation = f.generation + 1
 
@@ -75,7 +75,7 @@ class Variable:
         return self._data
 
     @property
-    def creator(self) -> Optional[Union[OneArgFunction, TwoArgsFunction]]:
+    def creator(self) -> Optional[Function]:
         return self._creator
 
     @property
@@ -111,7 +111,7 @@ class Variable:
 
 
 class ComparableFunction:
-    def __init__(self, f: Union[OneArgFunction, TwoArgsFunction]) -> None:
+    def __init__(self, f: Function) -> None:
         self._f = f
 
     @property
@@ -119,8 +119,16 @@ class ComparableFunction:
         return self._f.generation
 
     @property
-    def function(self) -> Union[OneArgFunction, TwoArgsFunction]:
+    def function(self) -> Function:
         return self._f
+
+    def __eq__(self, other: Any) -> bool:
+        assert isinstance(other, ComparableFunction)
+        return self.function == other.function
+
+    def __lt__(self, other: Any) -> bool:
+        assert isinstance(other, ComparableFunction)
+        return (self.generation, id(self.function)) < (other.generation, id(other.function))
 
 
 class Function(Protocol):
@@ -135,6 +143,22 @@ class Function(Protocol):
     @abstractmethod
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
         ...
+
+
+class DummyFunction:
+    def __init__(self, generation: int) -> None:
+        self._generation = generation
+
+    @property
+    def generation(self) -> int:
+        return self._generation
+
+    @property
+    def inputs(self) -> tuple[Variable, ...]:
+        raise NotImplementedError()
+
+    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+        raise NotImplementedError()
 
 
 class OneArgFunction(ABC):
