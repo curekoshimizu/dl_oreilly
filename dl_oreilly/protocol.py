@@ -122,6 +122,10 @@ class Variable(ABC):
         ...
 
     @abstractmethod
+    def __pow__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
     def __truediv__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         ...
 

@@ -74,3 +74,11 @@ def test_operation_div() -> None:
     x = Var(np.array(2.0))
     assert (1.0 / x).data == 0.5
     assert (x / 4.0).data == 0.5
+
+
+def test_operation_pow() -> None:
+    x = Var(np.array(2.0))
+    y = x**3
+    y.backward()
+    assert y.data == 8.0
+    assert x.grad == 12.0

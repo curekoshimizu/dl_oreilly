@@ -6,7 +6,7 @@ import numpy as np
 
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
-from .function import add, div, mul, neg, sub
+from .function import add, div, mul, neg, pow, sub
 from .protocol import Variable
 
 
@@ -67,6 +67,13 @@ class Var(Variable):
         if not isinstance(other, Variable):
             other = Var(other)
         return div(self, other)
+
+    def __pow__(self, exp: Variable | NDFloatArray | float | int) -> Variable:
+        if isinstance(exp, int) or isinstance(exp, float):
+            exp = np.array(exp)
+        if not isinstance(exp, Variable):
+            exp = Var(exp)
+        return pow(self, exp)
 
     def __radd__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):

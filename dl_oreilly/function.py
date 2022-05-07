@@ -133,6 +133,22 @@ class Neg(OneArgFunction):
         return -grad_y
 
 
+class Pow(OneArgFunction):
+    """
+    f(x) = x ** exp
+    f'(x) = exp * x ** (exp - 1)
+    """
+
+    def __init__(self, exp: Variable) -> None:
+        self._exp = exp.data
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return x**self._exp
+
+    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
+        return self._exp * (self.x ** (self._exp - 1)) * grad_y
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -209,3 +225,7 @@ def mul(x1: Variable, x2: Variable) -> Variable:
 
 def div(x1: Variable, x2: Variable) -> Variable:
     return Div()(x1, x2)
+
+
+def pow(base: Variable, exp: Variable) -> Variable:
+    return Pow(exp)(base)
