@@ -23,6 +23,9 @@ class Function(Protocol):
 
 
 class Variable(Protocol):
+    def new_variable(cls, data: NDFloatArray) -> Variable:
+        ...
+
     def backward(self) -> None:
         ...
 
@@ -55,6 +58,10 @@ class Variable(Protocol):
 
     @property
     def creator(self) -> Optional[Function]:
+        ...
+
+    @creator.setter
+    def creator(self, f: Function) -> None:
         ...
 
     @property

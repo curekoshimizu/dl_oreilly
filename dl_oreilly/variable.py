@@ -18,6 +18,9 @@ class Var:
         self._name = name
         self._generation = 0
 
+    def new_variable(cls, data: NDFloatArray, name: Optional[str] = None) -> Variable:
+        return Var(data, name=name)
+
     def backward(self) -> None:
         self.grad = np.ones_like(self.data)
         queue = _FunctionPriorityQueue()
@@ -37,10 +40,6 @@ class Var:
                 f = x.creator
                 if f is not None:
                     queue.register(f)
-
-    def set_creator(self, f: Function) -> None:
-        self._creator = f
-        self._generation = f.generation + 1
 
     @property
     def optional_grad(self) -> Optional[NDFloatArray]:
@@ -69,6 +68,11 @@ class Var:
     @property
     def creator(self) -> Optional[Function]:
         return self._creator
+
+    @creator.setter
+    def creator(self, f: Function) -> None:
+        self._creator = f
+        self._generation = f.generation + 1
 
     @property
     def name(self) -> Optional[str]:
@@ -183,8 +187,8 @@ class OneArgFunction(ABC):
         self._generation = input.generation
         y = self.forward(input.data)
 
-        output = Var(y)
-        output.set_creator(self)
+        output = input.new_variable(y)
+        output.creator = self
 
         self._output = output
         return output
@@ -228,8 +232,8 @@ class TwoArgsFunction(ABC):
         self._generation = max(x1.generation, x2.generation)
         y = self.forward(x1.data, x2.data)
 
-        output = Var(y)
-        output.set_creator(self)
+        output = x1.new_variable(y)
+        output.creator = self
 
         self._output = output
         return output
