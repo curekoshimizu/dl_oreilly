@@ -17,13 +17,13 @@ class Var(Variable):
     def new_variable(cls, data: NDFloatArray, name: Optional[str] = None) -> Variable:
         return Var(data, name=name)
 
-    def backward(self) -> None:
+    def backward(self, retain_grad: bool = False) -> None:
         self._set_grad(np.ones_like(self.data))
         queue = _FunctionPriorityQueue()
 
-        f = self.creator
-        if f is not None:
-            queue.register(f)
+        f0 = self.creator
+        if f0 is not None:
+            queue.register(f0)
         while not queue.is_empty():
             f = queue.pop()
             xs = f.inputs
@@ -33,9 +33,12 @@ class Var(Variable):
                 pre_grad = x.optional_grad
                 base = np.array(0.0) if pre_grad is None else pre_grad
                 x._set_grad(grad + base)
-                f = x.creator
-                if f is not None:
-                    queue.register(f)
+                f0 = x.creator
+                if f0 is not None:
+                    queue.register(f0)
+            if not retain_grad:
+                y = f.output
+                y._set_grad(None)
 
     def __neg__(self) -> Variable:
         return neg(self)

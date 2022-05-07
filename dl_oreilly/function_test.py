@@ -163,8 +163,22 @@ def test_generateion() -> None:
     c.name = "c"
     y = add(b, c)
     y.name = "y"
-    y.backward()
+    y.backward(retain_grad=True)
     assert y.data == 32.0
     assert b.grad == 1.0
     assert a.grad == 16.0
+    assert x.grad == 64.0
+
+    y.clear_grad()
+    c.clear_grad()
+    b.clear_grad()
+    a.clear_grad()
+    x.clear_grad()
+    assert b.optional_grad is None
+    assert a.optional_grad is None
+    assert x.optional_grad is None
+
+    y.backward(retain_grad=False)
+    assert b.optional_grad is None
+    assert a.optional_grad is None
     assert x.grad == 64.0

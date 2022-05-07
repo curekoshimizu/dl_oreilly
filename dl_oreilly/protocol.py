@@ -39,10 +39,10 @@ class Variable(ABC):
 
     @property
     def grad(self) -> NDFloatArray:
-        assert self._grad is not None, "grad is not computed."
+        assert self._grad is not None, "grad is not computed or not retained."
         return self._grad
 
-    def _set_grad(self, grad: NDFloatArray) -> None:
+    def _set_grad(self, grad: Optional[NDFloatArray]) -> None:
         self._grad = grad
 
     def clear_grad(self) -> None:
@@ -102,7 +102,7 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def backward(self) -> None:
+    def backward(self, retain_grad: bool = False) -> None:
         ...
 
     @abstractmethod
