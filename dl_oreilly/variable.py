@@ -6,7 +6,7 @@ import numpy as np
 
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
-from .function import mul
+from .function import add, mul
 from .protocol import Function, Variable
 
 
@@ -104,3 +104,9 @@ class Var:
     def __repr__(self) -> str:
         name = "" if self.name is None else f"{self.name}:"
         return f"variable({name}{self.data})"
+
+    def __mul__(self, other: Variable) -> Variable:
+        return mul(self, other)
+
+    def __add__(self, other: Variable) -> Variable:
+        return add(self, other)

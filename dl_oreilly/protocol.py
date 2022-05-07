@@ -67,3 +67,9 @@ class Variable(Protocol):
     @property
     def generation(self) -> int:
         ...
+
+    def __mul__(self, other: Variable) -> Variable:
+        ...
+
+    def __add__(self, other: Variable) -> Variable:
+        ...
