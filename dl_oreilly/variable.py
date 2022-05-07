@@ -19,37 +19,22 @@ class Variable:
 
     def backward(self) -> None:
         self.grad = np.ones_like(self.data)
-        variables: list[Variable] = [self]
+        queue = _FunctionPriorityQueue()
 
-        # funcs: list[ Function] = []
-        # f = self.creator
-        # if f is not None:
-        #     funcs.append(f)
-        #
-        #
-        # while len(funcs) > 0:
-        #     funcs
-
-        while len(variables) > 0:
-            # print("-[status]---------------")
-            # for x in variables:
-            #     print(x.name, "grad =", x.grad)
-            # print("------------------------")
-
-            variable = variables.pop(0)
-            f = variable.creator
-            if f is None:
-                continue
-
+        f = self.creator
+        if f is not None:
+            queue.register(f)
+        while not queue.is_empty():
+            f = queue.pop()
             xs = f.inputs
-            grads: tuple[NDFloatArray, ...]
-            grads = f.backward(variable.grad)
+            grads = f.backward(f.output.grad)
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
                 base = np.array(0.0) if x._grad is None else x._grad
                 x._grad = grad + base
-                # print(x.name, "updated", x._grad)
-            variables.extend(xs)
+                f = x.creator
+                if f is not None:
+                    queue.register(f)
 
     @property
     def grad(self) -> NDFloatArray:
@@ -148,6 +133,10 @@ class Function(Protocol):
     def inputs(self) -> tuple[Variable, ...]:
         ...
 
+    @property
+    def output(self) -> Variable:
+        ...
+
     @abstractmethod
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
         ...
@@ -163,6 +152,10 @@ class DummyFunction:
 
     @property
     def inputs(self) -> tuple[Variable, ...]:
+        raise NotImplementedError()
+
+    @property
+    def output(self) -> Variable:
         raise NotImplementedError()
 
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
@@ -217,6 +210,10 @@ class OneArgFunction(ABC):
         return self._input
 
     @property
+    def output(self) -> Variable:
+        return self._output
+
+    @property
     def inputs(self) -> tuple[Variable, ...]:
         return (self._input,)
 
@@ -260,6 +257,10 @@ class TwoArgsFunction(ABC):
     @property
     def xs(self) -> tuple[NDFloatArray, NDFloatArray]:
         return (self._inputs[0].data, self._inputs[1].data)
+
+    @property
+    def output(self) -> Variable:
+        return self._output
 
     @abstractmethod
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:

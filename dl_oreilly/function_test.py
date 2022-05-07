@@ -153,18 +153,18 @@ def test_mul() -> None:
     assert y.grad == 3.0
 
 
-# def test_generateion() -> None:
-#     x = Variable(np.array(2.0), name="x")
-#     a = square(x)
-#     a.name = "a"
-#     b = square(a)
-#     b.name = "b"
-#     c = square(a)
-#     c.name = "c"
-#     y = add(b, c)
-#     y.name = "y"
-#     y.backward()
-#     assert y.data == 32.0
-#     assert b.grad == 1.0
-#     assert a.grad == 16.0
-#     assert x.grad == 64.0
+def test_generateion() -> None:
+    x = Variable(np.array(2.0), name="x")
+    a = square(x)
+    a.name = "a"
+    b = square(a)
+    b.name = "b"
+    c = square(a)
+    c.name = "c"
+    y = add(b, c)
+    y.name = "y"
+    y.backward()
+    assert y.data == 32.0
+    assert b.grad == 1.0
+    assert a.grad == 16.0
+    assert x.grad == 64.0
