@@ -117,6 +117,7 @@ class Variable:
 class Function(ABC):
     def __call__(self, input: Variable) -> Variable:
         self._input = input
+        assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
         self._generation = input.generation
         y = self.forward(input.data)
 
@@ -154,6 +155,7 @@ class Function(ABC):
 class TwoArgsFunction(ABC):
     def __call__(self, x1: Variable, x2: Variable) -> Variable:
         self._inputs = (x1, x2)
+        assert getattr(self, "_generation", None) is None, "this function has already been called. but called again!"
         self._generation = max(x1.generation, x2.generation)
         y = self.forward(x1.data, x2.data)
 
