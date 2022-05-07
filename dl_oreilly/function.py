@@ -120,6 +120,19 @@ class Exp(OneArgFunction):
         return grad_x
 
 
+class Neg(OneArgFunction):
+    """
+    f(x) = -x
+    f'(x) = -1
+    """
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return -x
+
+    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
+        return -grad_y
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -130,6 +143,18 @@ class Add(TwoArgsFunction):
 
     def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
         return (grad, grad)
+
+
+class Sub(TwoArgsFunction):
+    """
+    f(x, y) = x - y
+    """
+
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        return x - y
+
+    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+        return (grad, -grad)
 
 
 class Mul(TwoArgsFunction):
@@ -145,6 +170,19 @@ class Mul(TwoArgsFunction):
         return (grad * x2, grad * x1)
 
 
+class Div(TwoArgsFunction):
+    """
+    f(x, y) = x / y
+    """
+
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        return x / y
+
+    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+        x1, x2 = self.xs
+        return (grad / x2, -grad * x1 / x2 / x2)
+
+
 def square(x: Variable) -> Variable:
     return Square()(x)
 
@@ -153,9 +191,21 @@ def exp(x: Variable) -> Variable:
     return Exp()(x)
 
 
+def neg(x: Variable) -> Variable:
+    return Neg()(x)
+
+
 def add(x1: Variable, x2: Variable) -> Variable:
     return Add()(x1, x2)
 
 
+def sub(x1: Variable, x2: Variable) -> Variable:
+    return Sub()(x1, x2)
+
+
 def mul(x1: Variable, x2: Variable) -> Variable:
     return Mul()(x1, x2)
+
+
+def div(x1: Variable, x2: Variable) -> Variable:
+    return Div()(x1, x2)

@@ -6,7 +6,7 @@ import numpy as np
 
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
-from .function import add, mul
+from .function import add, div, mul, neg, sub
 from .protocol import Variable
 
 
@@ -37,12 +37,8 @@ class Var(Variable):
                 if f is not None:
                     queue.register(f)
 
-    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
-        if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
-        if not isinstance(other, Variable):
-            other = Var(other)
-        return mul(self, other)
+    def __neg__(self) -> Variable:
+        return neg(self)
 
     def __add__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
@@ -51,12 +47,43 @@ class Var(Variable):
             other = Var(other)
         return add(self, other)
 
-    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
+    def __sub__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
             other = np.array(other)
-        return mul(self, Var(other))
+        if not isinstance(other, Variable):
+            other = Var(other)
+        return sub(self, other)
+
+    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
+        if not isinstance(other, Variable):
+            other = Var(other)
+        return mul(self, other)
+
+    def __truediv__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
+        if not isinstance(other, Variable):
+            other = Var(other)
+        return div(self, other)
 
     def __radd__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
             other = np.array(other)
-        return add(self, Var(other))
+        return add(Var(other), self)
+
+    def __rsub__(self, other: NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
+        return sub(Var(other), self)
+
+    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
+        return mul(Var(other), self)
+
+    def __rtruediv__(self, other: NDFloatArray | float | int) -> Variable:
+        if isinstance(other, int) or isinstance(other, float):
+            other = np.array(other)
+        return div(Var(other), self)

@@ -45,3 +45,32 @@ def test_operation_3() -> None:
     w.backward()
     assert w.data == 7.0
     assert x.grad == 2.0
+
+
+def test_operation_neg() -> None:
+    x = Var(np.array(2.0))
+    assert (-x).data == -2.0
+
+
+def test_operation_add() -> None:
+    x = Var(np.array(2.0))
+    assert (2.0 + x).data == 4.0
+    assert (x + 4.0).data == 6.0
+
+
+def test_operation_sub() -> None:
+    x = Var(np.array(2.0))
+    assert (1.0 - x).data == -1.0
+    assert (x - 1.0).data == 1.0
+
+
+def test_operation_mul() -> None:
+    x = Var(np.array(2.0))
+    assert (2.0 * x).data == 4.0
+    assert (x * 4.0).data == 8.0
+
+
+def test_operation_div() -> None:
+    x = Var(np.array(2.0))
+    assert (1.0 / x).data == 0.5
+    assert (x / 4.0).data == 0.5

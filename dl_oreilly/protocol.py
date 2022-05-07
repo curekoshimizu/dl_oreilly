@@ -106,7 +106,7 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+    def __neg__(self) -> Variable:
         ...
 
     @abstractmethod
@@ -114,9 +114,29 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
+    def __sub__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
+    def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
+    def __truediv__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         ...
 
     @abstractmethod
     def __radd__(self, other: NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
+    def __rsub__(self, other: NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
+    def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
+        ...
+
+    @abstractmethod
+    def __rtruediv__(self, other: NDFloatArray | float | int) -> Variable:
         ...
