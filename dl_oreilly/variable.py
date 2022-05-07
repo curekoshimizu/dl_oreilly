@@ -19,11 +19,25 @@ class Variable:
         self.grad = np.ones_like(self.data)
         variables: list[Variable] = [self]
 
+        # funcs: list[ Union[Function, TwoArgsFunction]] = []
+        # f = self.creator
+        # if f is not None:
+        #     funcs.append(f)
+        #
+        #
+        # while len(funcs) > 0:
+        #     funcs
+
         while len(variables) > 0:
+            # print("-[status]---------------")
+            # for x in variables:
+            #     print(x.name, "grad =", x.grad)
+            # print("------------------------")
+
             variable = variables.pop(0)
             f = variable.creator
             if f is None:
-                break
+                continue
 
             xs = f.inputs
             grads: tuple[NDFloatArray, ...]
@@ -36,6 +50,7 @@ class Variable:
             for x, grad in zip(xs, grads):
                 base = np.array(0.0) if x._grad is None else x._grad
                 x._grad = grad + base
+                # print(x.name, "updated", x._grad)
             variables.extend(xs)
 
     @property

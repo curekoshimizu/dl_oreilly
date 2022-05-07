@@ -100,13 +100,25 @@ def test_add_same_variable() -> None:
     assert x.grad == 2.0
 
 
-@pytest.mark.xfail(reason="implement generation")
+# @pytest.mark.xfail(reason="implement generation")
 def test_add_same_variable_2() -> None:
-    x = Variable(np.array(3))
-    y = add(add(add(x, x), x), x)
+    x = Variable(np.array(3), name="x")
+    a = add(x, x)
+    a.name = "a"
+    b = add(a, x)
+    b.name = "b"
+    y = add(b, x)
+    y.name = "y"
     y.backward()
     assert y.data == 12.0
     assert x.grad == 4.0
+
+    w = Variable(np.array(3), "w")
+    z = add(add(add(w, w), w), w)
+    z.name = "z"
+    z.backward()
+    assert z.data == 12.0
+    assert w.grad == 4.0
 
 
 def test_square_and_add() -> None:
@@ -140,3 +152,20 @@ def test_mul() -> None:
     assert w.data == 7.0
     assert x.grad == 2.0
     assert y.grad == 3.0
+
+
+# def test_generateion() -> None:
+#     x = Variable(np.array(2.0), name="x")
+#     a = square(x)
+#     a.name = "a"
+#     b = square(a)
+#     b.name = "b"
+#     c = square(a)
+#     c.name = "c"
+#     y = add(b, c)
+#     y.name = "y"
+#     y.backward()
+#     assert y.data == 32.0
+#     assert b.grad == 1.0
+#     assert a.grad == 16.0
+#     assert x.grad == 64.0
