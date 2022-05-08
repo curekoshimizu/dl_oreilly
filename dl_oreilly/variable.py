@@ -29,7 +29,7 @@ class Var(Variable):
         while not queue.is_empty():
             f = queue.pop()
             xs = f.inputs
-            grads = f.backward(f.output)
+            grads = f.backward(f.output.grad)
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
                 pre_grad = x.optional_grad
@@ -42,8 +42,6 @@ class Var(Variable):
                     queue.register(f0)
             if not retain_grad:
                 y = f.output
-                # print("function Name : ", f.name)
-                # print("name", y.name, "cleared")
                 y._set_grad(None)
 
     def save_graph(self, path: Optional[pathlib.Path] = None) -> None:

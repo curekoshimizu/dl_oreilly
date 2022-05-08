@@ -26,7 +26,7 @@ class OneArgFunction(ABC):
         return self._generation
 
     @property
-    def input(self) -> Variable:
+    def x(self) -> Variable:
         return self._input
 
     @property
@@ -36,10 +36,6 @@ class OneArgFunction(ABC):
     @property
     def inputs(self) -> tuple[Variable, ...]:
         return (self._input,)
-
-    @property
-    def x(self) -> NDFloatArray:
-        return self._input.data
 
     @abstractmethod
     def forward(self, x: NDFloatArray) -> NDFloatArray:
@@ -79,10 +75,6 @@ class TwoArgsFunction(ABC):
     @property
     def inputs(self) -> tuple[Variable, Variable]:
         return self._inputs
-
-    @property
-    def xs(self) -> tuple[NDFloatArray, NDFloatArray]:
-        return (self._inputs[0].data, self._inputs[1].data)
 
     @property
     def output(self) -> Variable:
@@ -136,7 +128,7 @@ class Exp(OneArgFunction):
         return np.exp(x)
 
     def _backward_core(self, grad: Variable) -> Variable:
-        ret = np.exp(self.x)
+        ret = np.exp(self.x.data)
         return grad * ret
 
 
@@ -191,7 +183,7 @@ class Sin(OneArgFunction):
         return np.sin(x)
 
     def _backward_core(self, grad: Variable) -> Variable:
-        ret = np.cos(self.x)
+        ret = np.cos(self.x.data)
         return grad * ret
 
 
@@ -240,7 +232,7 @@ class Mul(TwoArgsFunction):
         return x * y
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        x1, x2 = self.xs
+        x1, x2 = self.inputs
         return (grad * x2, grad * x1)
 
 
@@ -257,7 +249,7 @@ class Div(TwoArgsFunction):
         return x / y
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        x1, x2 = self.xs
+        x1, x2 = self.inputs
         return (grad / x2, -grad * x1 / x2 / x2)
 
 
