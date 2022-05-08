@@ -183,8 +183,24 @@ class Sin(OneArgFunction):
         return np.sin(x)
 
     def _backward_core(self, grad: Variable) -> Variable:
-        ret = np.cos(self.x.data)
-        return grad * ret
+        return cos(self.x) * grad
+
+
+class Cos(OneArgFunction):
+    """
+    f(x) = cos(x)
+    f'(x) = -sin(x)
+    """
+
+    @property
+    def name(self) -> str:
+        return "cos"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.cos(x)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return -sin(self.x) * grad
 
 
 class Add(TwoArgsFunction):
@@ -287,6 +303,10 @@ def pow(base: Variable, exp: Variable) -> Variable:
 
 def sin(x: Variable) -> Variable:
     return Sin()(x)
+
+
+def cos(x: Variable) -> Variable:
+    return Cos()(x)
 
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
