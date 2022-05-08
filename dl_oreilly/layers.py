@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import Any, Iterator, Optional, Type
 
 import numpy as np
 
-from .function import linear
+from .function import linear, sigmoid
 from .protocol import Variable
 from .variable import Parameter
 
@@ -13,7 +15,7 @@ class Layer(ABC):
         self._params: set[str] = set()
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if isinstance(value, Parameter):
+        if isinstance(value, (Parameter, Layer)):
             self._params.add(name)
         super().__setattr__(name, value)
 
@@ -31,7 +33,11 @@ class Layer(ABC):
 
     def params(self) -> Iterator[Parameter]:
         for name in self._params:
-            yield self.__dict__[name]
+            obj = self.__dict__[name]
+            if isinstance(obj, Layer):
+                yield from obj.params()
+            else:
+                yield obj
 
 
 class Linear(Layer):
@@ -63,3 +69,14 @@ class Linear(Layer):
         assert self.W is not None
 
         return linear(x, self.W, self.b)
+
+
+class TwoLayerNet(Layer):
+    def __init__(self, hidden_size: int, out_size: int) -> None:
+        super().__init__()
+        self.l1 = Linear(out_size=hidden_size)
+        self.l2 = Linear(out_size=out_size)
+
+    def forward(self, x: Variable) -> Variable:
+        y = sigmoid(self.l1(x))
+        return self.l2(y)
