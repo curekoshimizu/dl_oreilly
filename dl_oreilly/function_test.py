@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, add, cos, diff_f, exp, mul, reshape, sin, square, tanh
+from .function import Exp, Square, add, cos, diff_f, exp, mul, reshape, sin, square, tanh, transpose
 from .protocol import Variable
 from .variable import Var
 
@@ -268,4 +268,15 @@ def test_reshape() -> None:
     y = reshape(x, (6,))
     y.backward(retain_grad=True)
     assert x.data.shape == (2, 3)
+    assert np.all(x.grad.data == np.ones((2, 3)))
+
+
+def test_transpose() -> None:
+    origin = np.random.rand(2, 3)
+    x = Var(origin.copy())
+    y = transpose(x)
+    y.backward(retain_grad=True)
+    assert y.data.shape == (3, 2)
+    assert x.data.shape == (2, 3)
+    assert np.all(x.data == origin)
     assert np.all(x.grad.data == np.ones((2, 3)))

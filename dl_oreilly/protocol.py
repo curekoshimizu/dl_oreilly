@@ -123,6 +123,14 @@ class Variable(ABC):
         ...
 
     @abstractmethod
+    def transpose(self) -> Variable:
+        ...
+
+    @property
+    def T(self) -> Variable:
+        return self.transpose()
+
+    @abstractmethod
     def __neg__(self) -> Variable:
         ...
 

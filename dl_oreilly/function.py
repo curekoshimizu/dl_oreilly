@@ -223,8 +223,9 @@ class Tanh(OneArgFunction):
 
 class Reshape(OneArgFunction):
     """
-    foward   : np.array([[[1, 2],[3,4]]) -> [1, 2, 3, 4]
-    backward : [1, 2, 3, 4] -> np.array([[[1, 2],[3,4]])
+    Example.
+    foward   : np.array([[[1,2],[3,4]]) -> [1, 2, 3, 4]
+    backward : [1, 2, 3, 4] -> np.array([[[1,2],[3,4]])
     """
 
     def __init__(self, shape: tuple[int, ...]) -> None:
@@ -240,6 +241,24 @@ class Reshape(OneArgFunction):
 
     def _backward_core(self, grad: Variable) -> Variable:
         return reshape(grad, self._xshape)
+
+
+class Transpose(OneArgFunction):
+    """
+    Example.
+    foward   : np.array([[[1,2],[3,4]]) -> np.array([[1,3],[2,4]])
+    backward : np.array([[[1,3],[2,4]]) -> np.array([[1,2],[3,4]])
+    """
+
+    @property
+    def name(self) -> str:
+        return "transpose"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.transpose(x)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return transpose(grad)
 
 
 class Add(TwoArgsFunction):
@@ -356,6 +375,10 @@ def reshape(x: Variable, shape: tuple[int, ...]) -> Variable:
     if x.shape == shape:
         return x
     return Reshape(shape)(x)
+
+
+def transpose(x: Variable) -> Variable:
+    return Transpose()(x)
 
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
