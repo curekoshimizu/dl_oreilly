@@ -6,7 +6,7 @@ from typing import Any, Iterator, Optional, Type
 
 import numpy as np
 
-from .function import linear, sigmoid
+from .function import linear
 from .graph import Graphviz
 from .protocol import Variable
 from .variable import Parameter
@@ -84,16 +84,3 @@ class Model(Layer):
                 name = "variable"
             path = pathlib.Path(f"{name}.png")
         g.save(y, path)
-
-
-class TwoLayerNet(Model):
-    def __init__(self, hidden_size: int, out_size: int) -> None:
-        super().__init__()
-        self.l1 = Linear(out_size=hidden_size)
-        self.l2 = Linear(out_size=out_size)
-
-    def forward(self, x: Variable) -> Variable:
-        y = sigmoid(self.l1(x))
-        return self.l2(y)
-
-
