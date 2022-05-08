@@ -115,7 +115,7 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def backward(self, retain_grad: bool = False) -> None:
+    def backward(self, retain_grad: bool = False, create_graph: bool = False) -> None:
         ...
 
     @abstractmethod

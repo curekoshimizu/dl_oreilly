@@ -7,6 +7,7 @@ import numpy as np
 
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
+from .config import enable_backprop
 from .function import add, div, mul, neg, pow, sub
 from .graph import Graphviz
 from .protocol import Variable
@@ -19,30 +20,31 @@ class Var(Variable):
     def new_variable(cls, data: NDFloatArray, name: Optional[str] = None) -> Variable:
         return Var(data, name=name)
 
-    def backward(self, retain_grad: bool = False) -> None:
-        self._set_grad(Var(np.ones_like(self.data)))
-        queue = _FunctionPriorityQueue()
+    def backward(self, retain_grad: bool = False, create_graph: bool = False) -> None:
+        with enable_backprop(create_graph):
+            self._set_grad(Var(np.ones_like(self.data)))
+            queue = _FunctionPriorityQueue()
 
-        f0 = self.creator
-        if f0 is not None:
-            queue.register(f0)
-        while not queue.is_empty():
-            f = queue.pop()
-            xs = f.inputs
-            grads = f.backward(f.output.grad)
-            assert len(xs) == len(grads)
-            for x, grad in zip(xs, grads):
-                pre_grad = x.optional_grad
-                if pre_grad is None:
-                    x._set_grad(grad)
-                else:
-                    x._set_grad(grad + pre_grad)
-                f0 = x.creator
-                if f0 is not None:
-                    queue.register(f0)
-            if not retain_grad:
-                y = f.output
-                y._set_grad(None)
+            f0 = self.creator
+            if f0 is not None:
+                queue.register(f0)
+            while not queue.is_empty():
+                f = queue.pop()
+                xs = f.inputs
+                grads = f.backward(f.output.grad)
+                assert len(xs) == len(grads)
+                for x, grad in zip(xs, grads):
+                    pre_grad = x.optional_grad
+                    if pre_grad is None:
+                        x._set_grad(grad)
+                    else:
+                        x._set_grad(grad + pre_grad)
+                    f0 = x.creator
+                    if f0 is not None:
+                        queue.register(f0)
+                if not retain_grad:
+                    y = f.output
+                    y._set_grad(None)
 
     def save_graph(self, path: Optional[pathlib.Path] = None) -> None:
         if path is None:

@@ -8,8 +8,14 @@ class Config:
 
 @contextlib.contextmanager
 def no_grad() -> Iterator[None]:
+    with enable_backprop(False):
+        yield
+
+
+@contextlib.contextmanager
+def enable_backprop(flag: bool) -> Iterator[None]:
     old = Config.enable_backprop
-    Config.enable_backprop = False
+    Config.enable_backprop = flag
     try:
         yield
     finally:
