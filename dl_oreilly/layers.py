@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import pathlib
 from abc import ABC, abstractmethod
 from typing import Any, Iterator, Optional, Type
 
 import numpy as np
 
 from .function import linear, sigmoid
+from .graph import Graphviz
 from .protocol import Variable
 from .variable import Parameter
 
@@ -71,7 +73,20 @@ class Linear(Layer):
         return linear(x, self.W, self.b)
 
 
-class TwoLayerNet(Layer):
+class Model(Layer):
+    def save_graph(self, x: Variable, path: Optional[pathlib.Path] = None) -> None:
+        y = self.forward(x)
+        g = Graphviz()
+
+        if path is None:
+            name = y.name
+            if name is None:
+                name = "variable"
+            path = pathlib.Path(f"{name}.png")
+        g.save(y, path)
+
+
+class TwoLayerNet(Model):
     def __init__(self, hidden_size: int, out_size: int) -> None:
         super().__init__()
         self.l1 = Linear(out_size=hidden_size)
@@ -80,3 +95,5 @@ class TwoLayerNet(Layer):
     def forward(self, x: Variable) -> Variable:
         y = sigmoid(self.l1(x))
         return self.l2(y)
+
+
