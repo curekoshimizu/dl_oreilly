@@ -43,18 +43,11 @@ class Variable(ABC):
         ...
 
     @property
-    def optional_grad(self) -> Optional[NDFloatArray]:
-        grad = self._grad
-        if grad is None:
-            return None
-        return grad.data
+    def optional_grad(self) -> Optional[Variable]:
+        return self._grad
 
     @property
-    def grad(self) -> NDFloatArray:
-        return self.grad_variable.data
-
-    @property
-    def grad_variable(self) -> Variable:
+    def grad(self) -> Variable:
         assert self._grad is not None, "grad is not computed or not retained."
         return self._grad
 

@@ -22,8 +22,8 @@ def test_operation_1() -> None:
     w = x * y + z
     w.backward()
     assert w.data == 7.0
-    assert x.grad == 2.0
-    assert y.grad == 3.0
+    assert x.grad.data == 2.0
+    assert y.grad.data == 3.0
 
 
 def test_operation_2() -> None:
@@ -34,7 +34,7 @@ def test_operation_2() -> None:
     w = x * y + z
     w.backward()
     assert w.data == 7.0
-    assert x.grad == 2.0
+    assert x.grad.data == 2.0
 
 
 def test_operation_3() -> None:
@@ -45,7 +45,7 @@ def test_operation_3() -> None:
     w = z + y * x
     w.backward()
     assert w.data == 7.0
-    assert x.grad == 2.0
+    assert x.grad.data == 2.0
 
 
 def test_operation_neg() -> None:
@@ -82,7 +82,7 @@ def test_operation_pow() -> None:
     y = x**3
     y.backward()
     assert y.data == 8.0
-    assert x.grad == 12.0
+    assert x.grad.data == 12.0
 
 
 def test_sphere() -> None:
@@ -93,8 +93,8 @@ def test_sphere() -> None:
     y = Var(np.array(1.0))
     z = sphere(x, y)
     z.backward()
-    assert x.grad == 2.0
-    assert y.grad == 2.0
+    assert x.grad.data == 2.0
+    assert y.grad.data == 2.0
 
 
 def test_matyas() -> None:
@@ -105,8 +105,8 @@ def test_matyas() -> None:
     y = Var(np.array(1.0))
     z = matyas(x, y)
     z.backward()
-    assert x.grad == 0.040000000000000036
-    assert y.grad == 0.040000000000000036
+    assert x.grad.data == 0.040000000000000036
+    assert y.grad.data == 0.040000000000000036
 
 
 def test_goldstein_price() -> None:
@@ -119,5 +119,5 @@ def test_goldstein_price() -> None:
     y = Var(np.array(1.0))
     z = f(x, y)
     z.backward()
-    assert x.grad == -5376.0
-    assert y.grad == 8064.0
+    assert x.grad.data == -5376.0
+    assert y.grad.data == 8064.0

@@ -33,8 +33,10 @@ class Var(Variable):
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
                 pre_grad = x.optional_grad
-                base = np.array(0.0) if pre_grad is None else pre_grad
-                x._set_grad(grad + base)
+                if pre_grad is None:
+                    x._set_grad(grad)
+                else:
+                    x._set_grad(grad + pre_grad)
                 f0 = x.creator
                 if f0 is not None:
                     queue.register(f0)

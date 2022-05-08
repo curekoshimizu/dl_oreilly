@@ -34,8 +34,8 @@ def test_normal_grad() -> None:
     lr = 0.001
 
     def update(x0: Variable, x1: Variable) -> None:
-        x0.data -= lr * x0.grad
-        x1.data -= lr * x1.grad
+        x0.data -= lr * x0.grad.data
+        x1.data -= lr * x1.grad.data
 
     n = _logic(update)
     assert n == 27514
