@@ -203,6 +203,24 @@ class Cos(OneArgFunction):
         return -sin(self.x) * grad
 
 
+class Tanh(OneArgFunction):
+    """
+    f(x) = tanh(x)
+    f'(x) = 1 -y*2
+    """
+
+    @property
+    def name(self) -> str:
+        return "tanh"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.tanh(x)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        y = self.output
+        return grad * (1 - y * y)
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -308,6 +326,8 @@ def sin(x: Variable) -> Variable:
 def cos(x: Variable) -> Variable:
     return Cos()(x)
 
+def tanh(x: Variable) -> Variable:
+    return Tanh()(x)
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
     create_graph = True

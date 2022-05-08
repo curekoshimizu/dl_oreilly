@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, add, cos, diff_f, exp, mul, sin, square
+from .function import Exp, Square, add, cos, diff_f, exp, mul, sin, square, tanh
 from .protocol import Variable
 from .variable import Var
 
@@ -252,3 +252,12 @@ def test_diff_cos() -> None:
 
     ddddx = diff_f(x, cos, n=4)
     assert ddddx.data == np.cos(2)
+
+
+def test_diff_tanh() -> None:
+    x = Var(np.array(2.0))
+    fx = diff_f(x, tanh, n=0)
+    assert fx.data == np.tanh(2)
+
+    dx = diff_f(x, tanh, n=1)
+    assert dx.data == 1 - np.tanh(2) * np.tanh(2)
