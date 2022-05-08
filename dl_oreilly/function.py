@@ -406,6 +406,9 @@ class MatMul(TwoArgsFunction):
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         x, W = self.inputs
+        assert (
+            x.ndim == W.ndim
+        ), f"x.ndim({x.ndim}) must be same as W.ndim({W.ndim}). Otherwise, transpose not working expctedly."
         gx = matmul(grad, W.T)
         gw = matmul(x.T, grad)
         return (gx, gw)

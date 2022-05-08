@@ -298,6 +298,14 @@ def test_transpose() -> None:
     assert np.all(x.data == origin)
     assert np.all(x.grad.data == np.ones((2, 3)))
 
+    x = Var(np.array([1, 2, 3]))
+    y = transpose(x)
+    y.backward()
+    assert y.data.shape == (3,)
+    assert x.data.shape == (3,)
+    assert np.all(x.data == y.data)
+    assert np.all(x.grad.data == np.ones((2, 3)))
+
 
 def test_sum() -> None:
     x = Var(np.array([1, 2, 3]))
@@ -351,7 +359,7 @@ def test_sum_to() -> None:
     assert np.all(x.grad.data == np.ones((2, 3)))
 
 
-def test_matmul() -> None:
+def test_matmul_ndim1() -> None:
     x = Var(np.array([1, 2]))
     w = Var(np.array([2, 3]))
     y = matmul(x, w)
@@ -359,3 +367,18 @@ def test_matmul() -> None:
     assert y.data == 8
     assert np.all(x.grad.data == np.array([2, 3]))
     assert np.all(w.grad.data == np.array([1, 2]))
+
+
+def test_matmul_ndim2() -> None:
+    x = Var(np.array([[1, 2]]), name="x")
+    w = Var(np.array([[2, 3], [4, 5]]), name="w")
+    y = matmul(x, w)
+    y.name = "y"
+    z = y.sum()
+    z.name = "z"
+    z.backward()
+    assert np.all(y.data == np.array([10, 13]))
+    assert np.all(z.data == np.array([23]))
+    assert z.data == 23
+    assert np.all(x.grad.data == np.array([5, 9]))
+    assert np.all(w.grad.data == np.array([[1, 1], [2, 2]]))
