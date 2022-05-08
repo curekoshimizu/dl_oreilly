@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Callable
 
 import numpy as np
 
@@ -128,7 +129,7 @@ class Exp(OneArgFunction):
         return np.exp(x)
 
     def _backward_core(self, grad: Variable) -> Variable:
-        ret = np.exp(self.x.data)
+        ret = exp(self.x)
         return grad * ret
 
 
@@ -287,3 +288,19 @@ def pow(base: Variable, exp: Variable) -> Variable:
 
 def sin(x: Variable) -> Variable:
     return Sin()(x)
+
+
+def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
+    create_graph = True
+    y = f(x)
+
+    while n > 0:
+        x.clear_grad()
+        if n == 1:
+            create_graph = False
+        y.backward(create_graph=create_graph)
+        n -= 1
+
+        y = x.grad
+
+    return y

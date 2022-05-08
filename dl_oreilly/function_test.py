@@ -1,7 +1,8 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, add, exp, mul, square
+from .function import Exp, Square, add, diff_f, exp, mul, square
+from .protocol import Variable
 from .variable import Var
 
 
@@ -182,3 +183,21 @@ def test_generateion() -> None:
     assert b.optional_grad is None
     assert a.optional_grad is None
     assert x.grad.data == 64.0
+
+
+def test_diff() -> None:
+    def f(x: Variable) -> Variable:
+        return 4 * x * x * x + x
+
+    x = Var(np.array(2.0))
+    fx = diff_f(x, f, n=0)
+    assert fx.data == 34
+
+    dx = diff_f(x, f, n=1)
+    assert dx.data == 49.0
+
+    ddx = diff_f(x, f, n=2)
+    assert ddx.data == 48.0
+
+    dddx = diff_f(x, f, n=3)
+    assert dddx.data == 24.0
