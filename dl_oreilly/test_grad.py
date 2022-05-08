@@ -1,7 +1,7 @@
-import pytest 
 from typing import Callable
 
 import numpy as np
+import pytest
 
 from .protocol import Variable
 from .variable import Var

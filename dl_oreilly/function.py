@@ -178,6 +178,23 @@ class Pow(OneArgFunction):
         return self._exp * (self.x ** (self._exp - 1)) * grad_y
 
 
+class Sin(OneArgFunction):
+    """
+    f(x) = sin(x)
+    f'(x) = cos(x)
+    """
+
+    @property
+    def name(self) -> str:
+        return "sin"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.sin(x)
+
+    def _backward_core(self, grad: NDFloatArray) -> NDFloatArray:
+        return np.cos(self.x) * grad
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -274,3 +291,7 @@ def div(x1: Variable, x2: Variable) -> Variable:
 
 def pow(base: Variable, exp: Variable) -> Variable:
     return Pow(exp)(base)
+
+
+def sin(x: Variable) -> Variable:
+    return Sin()(x)
