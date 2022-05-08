@@ -121,3 +121,7 @@ class Var(Variable):
         if isinstance(other, int) or isinstance(other, float):
             other = np.array(other)
         return div(Var(other), self)
+
+
+class Parameter(Var):
+    pass
