@@ -130,7 +130,6 @@ class Variable(ABC):
     def T(self) -> Variable:
         return self.transpose()
 
-
     @abstractmethod
     def sum(self) -> Variable:
         ...

@@ -8,7 +8,7 @@ import numpy as np
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
 from .config import enable_backprop
-from .function import add, div, mul, neg, pow, reshape, sub, transpose, sum
+from .function import add, div, mul, neg, pow, reshape, sub, sum, transpose
 from .graph import Graphviz
 from .protocol import Variable
 

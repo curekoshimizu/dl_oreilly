@@ -1,7 +1,22 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, add, cos, diff_f, exp, mul, reshape, sin, square, tanh, transpose
+from .function import (
+    Exp,
+    Square,
+    add,
+    broadcast_to,
+    cos,
+    diff_f,
+    exp,
+    mul,
+    reshape,
+    sin,
+    square,
+    sum_to,
+    tanh,
+    transpose,
+)
 from .protocol import Variable
 from .variable import Var
 
@@ -279,4 +294,46 @@ def test_transpose() -> None:
     assert y.data.shape == (3, 2)
     assert x.data.shape == (2, 3)
     assert np.all(x.data == origin)
+    assert np.all(x.grad.data == np.ones((2, 3)))
+
+
+def test_broadcast_to() -> None:
+    origin = np.random.rand(3)
+    x = Var(origin.copy())
+    y = broadcast_to(x, (2, 3))
+    y.backward(retain_grad=True)
+    assert y.data.shape == (2, 3)
+    assert x.data.shape == (3,)
+
+    assert np.all(y.data[0] == origin)
+    assert np.all(y.data[1] == origin)
+    assert np.all(x.grad.data == np.ones(3) * 2)
+
+    x.clear_grad()
+    z = broadcast_to(x, (3,))
+    z.backward(retain_grad=True)
+    assert z.data.shape == (3,)
+    assert x.data.shape == (3,)
+
+    assert np.all(z.data == origin)
+    assert np.all(x.grad.data == np.ones(3))
+
+
+def test_sum_to() -> None:
+    x = Var(np.array([[1, 2, 3], [4, 5, 6]]))
+    y = sum_to(x, (3,))
+    y.backward(retain_grad=True)
+    assert y.data.shape == (3,)
+    assert x.data.shape == (2, 3)
+
+    assert np.all(y.data == np.array([5, 7, 9]))
+    assert np.all(x.grad.data == np.ones((2, 3)))
+
+    x.clear_grad()
+    z = sum_to(x, (2, 3))
+    z.backward(retain_grad=True)
+    assert z.data.shape == (2, 3)
+    assert x.data.shape == (2, 3)
+
+    assert np.all(z.data == np.array([[1, 2, 3], [4, 5, 6]]))
     assert np.all(x.grad.data == np.ones((2, 3)))

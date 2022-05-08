@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, cast
 
 import numpy as np
 
@@ -273,10 +273,54 @@ class Sum(OneArgFunction):
         return "sum"
 
     def forward(self, x: NDFloatArray) -> NDFloatArray:
-        return np.sum(x)
+        return np.array(np.sum(x))
 
     def _backward_core(self, grad: Variable) -> Variable:
         raise NotImplementedError()
+
+
+class BroadcastTo(OneArgFunction):
+    def __init__(self, shape: tuple[int, ...]) -> None:
+        self._shape = shape
+
+    @property
+    def name(self) -> str:
+        return "broadcastTo"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        self._xshape = x.shape
+        return np.broadcast_to(x, self._shape)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return sum_to(grad, self._xshape)
+
+
+class SumTo(OneArgFunction):
+    def __init__(self, shape: tuple[int, ...]) -> None:
+        self._shape = shape
+
+    @property
+    def name(self) -> str:
+        return "sumTo"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        self._xshape = x.shape
+        ndim = len(self._shape)
+        lead = x.ndim - ndim
+        assert lead >= 0, "invalid argument"
+        lead_axis = tuple(range(lead))
+
+        axis = tuple([i + lead for i, sx in enumerate(self._shape) if sx == 1])
+        y = x.sum(lead_axis + axis, keepdims=True)
+        if lead > 0:
+            y = y.squeeze(lead_axis)
+        else:
+            y = np.array(y)
+        return cast(NDFloatArray, y)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return broadcast_to(grad, self._xshape)
+
 
 class Add(TwoArgsFunction):
     """
@@ -397,8 +441,18 @@ def reshape(x: Variable, shape: tuple[int, ...]) -> Variable:
 def transpose(x: Variable) -> Variable:
     return Transpose()(x)
 
+
 def sum(x: Variable) -> Variable:
     return Sum()(x)
+
+
+def broadcast_to(x: Variable, shape: tuple[int, ...]) -> Variable:
+    return BroadcastTo(shape)(x)
+
+
+def sum_to(x: Variable, shape: tuple[int, ...]) -> Variable:
+    return SumTo(shape)(x)
+
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
     create_graph = True
