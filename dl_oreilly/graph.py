@@ -18,6 +18,9 @@ class Graphviz:
         label = str(variable.data)
         if variable.name is not None:
             label = variable.name + ":" + label
+        grad = variable.optional_grad
+        if grad is not None:
+            label += f"\ngrad={grad}"
         return f'{id(variable)} [label="{label}", color=orange, style=filled]'
 
     def _dot_func(self, f: Function) -> str:
