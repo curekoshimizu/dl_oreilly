@@ -201,3 +201,18 @@ def test_diff() -> None:
 
     dddx = diff_f(x, f, n=3)
     assert dddx.data == 24.0
+
+
+def test_diff_exp() -> None:
+    x = Var(np.array(2.0))
+    fx = diff_f(x, exp, n=0)
+    assert fx.data == np.exp(2)
+
+    dx = diff_f(x, exp, n=1)
+    assert dx.data == np.exp(2)
+
+    ddx = diff_f(x, exp, n=2)
+    assert ddx.data == np.exp(2)
+
+    dddx = diff_f(x, exp, n=3)
+    assert dddx.data == np.exp(2)

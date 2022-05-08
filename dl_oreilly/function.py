@@ -129,8 +129,7 @@ class Exp(OneArgFunction):
         return np.exp(x)
 
     def _backward_core(self, grad: Variable) -> Variable:
-        ret = exp(self.x)
-        return grad * ret
+        return exp(self.x) * grad
 
 
 class Neg(OneArgFunction):
