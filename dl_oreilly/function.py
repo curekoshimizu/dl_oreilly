@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, cast
+from typing import Callable, Optional, cast
 
 import numpy as np
 
@@ -498,3 +498,15 @@ def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variab
         y = x.grad
 
     return y
+
+
+def linear(x: Variable, W: Variable, b: Optional[Variable]) -> Variable:
+    t = matmul(x, W)
+    if b is None:
+        return t
+
+    return t + b
+
+
+def sigmoid(x: Variable) -> Variable:
+    return 1 / (1 + exp(-x))
