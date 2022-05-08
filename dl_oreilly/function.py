@@ -261,6 +261,23 @@ class Transpose(OneArgFunction):
         return transpose(grad)
 
 
+class Sum(OneArgFunction):
+    """
+    Example.
+    foward   : np.array([[[1,2],[3,4]]) -> 10
+    backward : 10 -> np.array([[1,2],[3,4]])
+    """
+
+    @property
+    def name(self) -> str:
+        return "sum"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.sum(x)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        raise NotImplementedError()
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -380,6 +397,8 @@ def reshape(x: Variable, shape: tuple[int, ...]) -> Variable:
 def transpose(x: Variable) -> Variable:
     return Transpose()(x)
 
+def sum(x: Variable) -> Variable:
+    return Sum()(x)
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
     create_graph = True

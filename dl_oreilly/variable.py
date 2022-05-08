@@ -8,7 +8,7 @@ import numpy as np
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
 from .config import enable_backprop
-from .function import add, div, mul, neg, pow, reshape, sub, transpose
+from .function import add, div, mul, neg, pow, reshape, sub, transpose, sum
 from .graph import Graphviz
 from .protocol import Variable
 
@@ -60,6 +60,9 @@ class Var(Variable):
 
     def transpose(self) -> Variable:
         return transpose(self)
+
+    def sum(self) -> Variable:
+        return sum(self)
 
     def __neg__(self) -> Variable:
         return neg(self)
