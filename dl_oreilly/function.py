@@ -221,6 +221,27 @@ class Tanh(OneArgFunction):
         return grad * (1 - y * y)
 
 
+class Reshape(OneArgFunction):
+    """
+    foward   : np.array([[[1, 2],[3,4]]) -> [1, 2, 3, 4]
+    backward : [1, 2, 3, 4] -> np.array([[[1, 2],[3,4]])
+    """
+
+    def __init__(self, shape: tuple[int, ...]) -> None:
+        self._shape = shape
+
+    @property
+    def name(self) -> str:
+        return "reshape"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        self._xshape = x.shape
+        return x.reshape(self._shape)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return reshape(grad, self._xshape)
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -326,8 +347,16 @@ def sin(x: Variable) -> Variable:
 def cos(x: Variable) -> Variable:
     return Cos()(x)
 
+
 def tanh(x: Variable) -> Variable:
     return Tanh()(x)
+
+
+def reshape(x: Variable, shape: tuple[int, ...]) -> Variable:
+    if x.shape == shape:
+        return x
+    return Reshape(shape)(x)
+
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
     create_graph = True

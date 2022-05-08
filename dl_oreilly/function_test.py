@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .function import Exp, Square, add, cos, diff_f, exp, mul, sin, square, tanh
+from .function import Exp, Square, add, cos, diff_f, exp, mul, reshape, sin, square, tanh
 from .protocol import Variable
 from .variable import Var
 
@@ -261,3 +261,11 @@ def test_diff_tanh() -> None:
 
     dx = diff_f(x, tanh, n=1)
     assert dx.data == 1 - np.tanh(2) * np.tanh(2)
+
+
+def test_reshape() -> None:
+    x = Var(np.random.rand(2, 3))
+    y = reshape(x, (6,))
+    y.backward(retain_grad=True)
+    assert x.data.shape == (2, 3)
+    assert np.all(x.grad.data == np.ones((2, 3)))
