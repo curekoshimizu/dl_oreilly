@@ -38,6 +38,8 @@ class Var(Variable):
                     queue.register(f0)
             if not retain_grad:
                 y = f.output
+                # print("function Name : ", f.name)
+                # print("name", y.name, "cleared")
                 y._set_grad(None)
 
     def __neg__(self) -> Variable:

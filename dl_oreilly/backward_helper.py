@@ -49,6 +49,10 @@ class DummyFunction:
     def output(self) -> Variable:
         raise NotImplementedError()
 
+    @property
+    def name(self) -> str:
+        return "dummy"
+
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
         raise NotImplementedError()
 

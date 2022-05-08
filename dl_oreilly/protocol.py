@@ -21,6 +21,10 @@ class Function(Protocol):
     def output(self) -> Variable:
         ...
 
+    @property
+    def name(self) -> str:
+        ...
+
     def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
         ...
 
@@ -60,6 +64,10 @@ class Variable(ABC):
     @property
     def data(self) -> NDFloatArray:
         return self._data
+
+    @data.setter
+    def data(self, data: NDFloatArray) -> None:
+        self._data = data
 
     @property
     def creator(self) -> Optional[Function]:

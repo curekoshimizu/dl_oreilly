@@ -45,6 +45,11 @@ class OneArgFunction(ABC):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         ...
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        ...
+
     @abstractmethod
     def _backward_core(self, x: NDFloatArray) -> NDFloatArray:
         ...
@@ -83,6 +88,11 @@ class TwoArgsFunction(ABC):
     def output(self) -> Variable:
         return self._output
 
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        ...
+
     @abstractmethod
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         ...
@@ -101,6 +111,10 @@ class Square(OneArgFunction):
     f'(x) = 2x
     """
 
+    @property
+    def name(self) -> str:
+        return "square"
+
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
 
@@ -115,6 +129,10 @@ class Exp(OneArgFunction):
     f'(x) = exp(x)
     """
 
+    @property
+    def name(self) -> str:
+        return "exp"
+
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.exp(x)
 
@@ -128,6 +146,10 @@ class Neg(OneArgFunction):
     f(x) = -x
     f'(x) = -1
     """
+
+    @property
+    def name(self) -> str:
+        return "neg"
 
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return -x
@@ -145,6 +167,10 @@ class Pow(OneArgFunction):
     def __init__(self, exp: Variable) -> None:
         self._exp = exp.data
 
+    @property
+    def name(self) -> str:
+        return "pow"
+
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**self._exp
 
@@ -156,6 +182,10 @@ class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
     """
+
+    @property
+    def name(self) -> str:
+        return "add"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x + y
@@ -169,6 +199,10 @@ class Sub(TwoArgsFunction):
     f(x, y) = x - y
     """
 
+    @property
+    def name(self) -> str:
+        return "sub"
+
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x - y
 
@@ -180,6 +214,10 @@ class Mul(TwoArgsFunction):
     """
     f(x, y) = x * y
     """
+
+    @property
+    def name(self) -> str:
+        return "mul"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x * y
@@ -193,6 +231,10 @@ class Div(TwoArgsFunction):
     """
     f(x, y) = x / y
     """
+
+    @property
+    def name(self) -> str:
+        return "div"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x / y
