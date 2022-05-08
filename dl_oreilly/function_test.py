@@ -9,6 +9,7 @@ from .function import (
     cos,
     diff_f,
     exp,
+    matmul,
     mul,
     reshape,
     sin,
@@ -348,3 +349,13 @@ def test_sum_to() -> None:
 
     assert np.all(z.data == np.array([[1, 2, 3], [4, 5, 6]]))
     assert np.all(x.grad.data == np.ones((2, 3)))
+
+
+def test_matmul() -> None:
+    x = Var(np.array([1, 2]))
+    w = Var(np.array([2, 3]))
+    y = matmul(x, w)
+    y.backward()
+    assert y.data == 8
+    assert np.all(x.grad.data == np.array([2, 3]))
+    assert np.all(w.grad.data == np.array([1, 2]))

@@ -389,6 +389,28 @@ class Div(TwoArgsFunction):
         return (grad / x2, -grad * x1 / x2 / x2)
 
 
+class MatMul(TwoArgsFunction):
+    """
+    f(x, y) = x @ y
+    """
+
+    @property
+    def name(self) -> str:
+        return "matmul"
+
+    def forward(self, x: NDFloatArray, W: NDFloatArray) -> NDFloatArray:
+        ret = x.dot(W)
+        if ret.ndim == 0:
+            return np.array(ret)
+        return cast(NDFloatArray, ret)
+
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
+        x, W = self.inputs
+        gx = matmul(grad, W.T)
+        gw = matmul(x.T, grad)
+        return (gx, gw)
+
+
 def square(x: Variable) -> Variable:
     return Square()(x)
 
@@ -453,6 +475,10 @@ def broadcast_to(x: Variable, shape: tuple[int, ...]) -> Variable:
 
 def sum_to(x: Variable, shape: tuple[int, ...]) -> Variable:
     return SumTo(shape)(x)
+
+
+def matmul(x: Variable, W: Variable) -> Variable:
+    return MatMul()(x, W)
 
 
 def diff_f(x: Variable, f: Callable[[Variable], Variable], n: int = 1) -> Variable:
