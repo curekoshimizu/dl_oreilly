@@ -51,10 +51,10 @@ class OneArgFunction(ABC):
         ...
 
     @abstractmethod
-    def _backward_core(self, x: NDFloatArray) -> NDFloatArray:
+    def _backward_core(self, x: Variable) -> Variable:
         ...
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+    def backward(self, grad: Variable) -> tuple[Variable, ...]:
         return (self._backward_core(grad),)
 
 
@@ -98,10 +98,10 @@ class TwoArgsFunction(ABC):
         ...
 
     @abstractmethod
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         ...
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+    def backward(self, grad: Variable) -> tuple[Variable, ...]:
         return self._backward_core(grad)
 
 
@@ -118,9 +118,8 @@ class Square(OneArgFunction):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**2
 
-    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
-        grad_x = (2 * self.x) * grad_y
-        return grad_x
+    def _backward_core(self, grad: Variable) -> Variable:
+        return (2 * self.x) * grad
 
 
 class Exp(OneArgFunction):
@@ -136,9 +135,9 @@ class Exp(OneArgFunction):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.exp(x)
 
-    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
-        grad_x = np.exp(self.x) * grad_y
-        return grad_x
+    def _backward_core(self, grad: Variable) -> Variable:
+        ret = np.exp(self.x)
+        return grad * ret
 
 
 class Neg(OneArgFunction):
@@ -154,8 +153,8 @@ class Neg(OneArgFunction):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return -x
 
-    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
-        return -grad_y
+    def _backward_core(self, grad: Variable) -> Variable:
+        return -grad
 
 
 class Pow(OneArgFunction):
@@ -174,8 +173,8 @@ class Pow(OneArgFunction):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return x**self._exp
 
-    def _backward_core(self, grad_y: NDFloatArray) -> NDFloatArray:
-        return self._exp * (self.x ** (self._exp - 1)) * grad_y
+    def _backward_core(self, grad: Variable) -> Variable:
+        return self._exp * (self.x ** (self._exp - 1)) * grad
 
 
 class Sin(OneArgFunction):
@@ -191,8 +190,9 @@ class Sin(OneArgFunction):
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         return np.sin(x)
 
-    def _backward_core(self, grad: NDFloatArray) -> NDFloatArray:
-        return np.cos(self.x) * grad
+    def _backward_core(self, grad: Variable) -> Variable:
+        ret = np.cos(self.x)
+        return grad * ret
 
 
 class Add(TwoArgsFunction):
@@ -207,7 +207,7 @@ class Add(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x + y
 
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         return (grad, grad)
 
 
@@ -223,7 +223,7 @@ class Sub(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x - y
 
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         return (grad, -grad)
 
 
@@ -239,7 +239,7 @@ class Mul(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x * y
 
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         x1, x2 = self.xs
         return (grad * x2, grad * x1)
 
@@ -256,7 +256,7 @@ class Div(TwoArgsFunction):
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
         return x / y
 
-    def _backward_core(self, grad: NDFloatArray) -> tuple[NDFloatArray, NDFloatArray]:
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         x1, x2 = self.xs
         return (grad / x2, -grad * x1 / x2 / x2)
 

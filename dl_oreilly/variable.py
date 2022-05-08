@@ -20,7 +20,7 @@ class Var(Variable):
         return Var(data, name=name)
 
     def backward(self, retain_grad: bool = False) -> None:
-        self._set_grad(np.ones_like(self.data))
+        self._set_grad(Var(np.ones_like(self.data)))
         queue = _FunctionPriorityQueue()
 
         f0 = self.creator
@@ -29,7 +29,7 @@ class Var(Variable):
         while not queue.is_empty():
             f = queue.pop()
             xs = f.inputs
-            grads = f.backward(f.output.grad)
+            grads = f.backward(f.output)
             assert len(xs) == len(grads)
             for x, grad in zip(xs, grads):
                 pre_grad = x.optional_grad

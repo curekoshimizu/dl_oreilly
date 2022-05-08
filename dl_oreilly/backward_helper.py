@@ -1,7 +1,6 @@
 import heapq
 from typing import Any
 
-from . import NDFloatArray
 from .protocol import Function, Variable
 
 
@@ -53,7 +52,7 @@ class DummyFunction:
     def name(self) -> str:
         return "dummy"
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+    def backward(self, grad: Variable) -> tuple[Variable, ...]:
         raise NotImplementedError()
 
 

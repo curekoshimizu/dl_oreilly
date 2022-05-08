@@ -26,7 +26,7 @@ class Function(Protocol):
     def name(self) -> str:
         ...
 
-    def backward(self, grad: NDFloatArray) -> tuple[NDFloatArray, ...]:
+    def backward(self, grad: Variable) -> tuple[Variable, ...]:
         ...
 
 
@@ -34,7 +34,7 @@ class Variable(ABC):
     def __init__(self, data: NDFloatArray, name: Optional[str]) -> None:
         self._data = data
         self._name = name
-        self._grad: Optional[NDFloatArray] = None
+        self._grad: Optional[Variable] = None
         self._creator: Optional[Function] = None
         self._generation = 0
 
@@ -44,14 +44,21 @@ class Variable(ABC):
 
     @property
     def optional_grad(self) -> Optional[NDFloatArray]:
-        return self._grad
+        grad = self._grad
+        if grad is None:
+            return None
+        return grad.data
 
     @property
     def grad(self) -> NDFloatArray:
+        return self.grad_variable.data
+
+    @property
+    def grad_variable(self) -> Variable:
         assert self._grad is not None, "grad is not computed or not retained."
         return self._grad
 
-    def _set_grad(self, grad: Optional[NDFloatArray]) -> None:
+    def _set_grad(self, grad: Optional[Variable]) -> None:
         self._grad = grad
 
     def clear_grad(self) -> None:
