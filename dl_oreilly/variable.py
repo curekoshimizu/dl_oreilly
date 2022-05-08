@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 from typing import Optional
 
 import numpy as np
@@ -7,6 +8,7 @@ import numpy as np
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
 from .function import add, div, mul, neg, pow, sub
+from .graph import Graphviz
 from .protocol import Variable
 
 
@@ -41,6 +43,15 @@ class Var(Variable):
                 # print("function Name : ", f.name)
                 # print("name", y.name, "cleared")
                 y._set_grad(None)
+
+    def save_graph(self, path: Optional[pathlib.Path] = None) -> None:
+        if path is None:
+            name = self.name
+            if name is None:
+                name = "variable"
+            path = pathlib.Path(f"{name}.png")
+        g = Graphviz()
+        g.save(self, path)
 
     def __neg__(self) -> Variable:
         return neg(self)

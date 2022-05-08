@@ -14,7 +14,7 @@ def test_dot_var() -> None:
     start = text.find("[")
     end = text.rfind("]")
 
-    assert text[start + 1 : end] == "label=\"x:[2.]\", color=orange, style=filled"
+    assert text[start + 1 : end] == 'label="x:[2.]", color=orange, style=filled'
 
 
 def test_dot_func() -> None:
@@ -27,7 +27,7 @@ def test_dot_func() -> None:
     start = text.find("[")
     end = text.rfind("]")
 
-    assert text[start + 1 : end] == "label=\"add\", color=lightblue, style=filled, shape=box"
+    assert text[start + 1 : end] == 'label="add", color=lightblue, style=filled, shape=box'
 
 
 def test_save() -> None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 from abc import ABC, abstractmethod
 from typing import Any, Optional, Protocol
 
@@ -36,6 +37,10 @@ class Variable(ABC):
         self._grad: Optional[NDFloatArray] = None
         self._creator: Optional[Function] = None
         self._generation = 0
+
+    @abstractmethod
+    def save_graph(self, path: Optional[pathlib.Path] = None) -> None:
+        ...
 
     @property
     def optional_grad(self) -> Optional[NDFloatArray]:
