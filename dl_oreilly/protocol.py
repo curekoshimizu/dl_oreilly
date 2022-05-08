@@ -119,6 +119,10 @@ class Variable(ABC):
         ...
 
     @abstractmethod
+    def reshape(self, reshape: tuple[int, ...]) -> Variable:
+        ...
+
+    @abstractmethod
     def __neg__(self) -> Variable:
         ...
 
