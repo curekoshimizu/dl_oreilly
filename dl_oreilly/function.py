@@ -273,10 +273,11 @@ class Sum(OneArgFunction):
         return "sum"
 
     def forward(self, x: NDFloatArray) -> NDFloatArray:
-        return np.array(np.sum(x))
+        self._xshape = x.shape
+        return np.array([np.sum(x)])
 
     def _backward_core(self, grad: Variable) -> Variable:
-        raise NotImplementedError()
+        return broadcast_to(grad, self._xshape)
 
 
 class BroadcastTo(OneArgFunction):

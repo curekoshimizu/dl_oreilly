@@ -13,6 +13,7 @@ from .function import (
     reshape,
     sin,
     square,
+    sum,
     sum_to,
     tanh,
     transpose,
@@ -295,6 +296,16 @@ def test_transpose() -> None:
     assert x.data.shape == (2, 3)
     assert np.all(x.data == origin)
     assert np.all(x.grad.data == np.ones((2, 3)))
+
+
+def test_sum() -> None:
+    x = Var(np.array([1, 2, 3]))
+    y = sum(x)
+    y.backward(retain_grad=True)
+    assert y.data.shape == (1,)
+    assert x.data.shape == (3,)
+    assert y.data == 6
+    assert np.all(x.grad.data == np.ones(3))
 
 
 def test_broadcast_to() -> None:
