@@ -108,7 +108,9 @@ class Variable(ABC):
 
     def __repr__(self) -> str:
         name = "" if self.name is None else f"{self.name}:"
-        return f"variable({name}{self.data})"
+        ret = f"variable({name}{self.data})"
+        ret = ret.replace("\n", "")
+        return ret
 
     @abstractmethod
     def new_variable(cls, data: NDFloatArray) -> Variable:
