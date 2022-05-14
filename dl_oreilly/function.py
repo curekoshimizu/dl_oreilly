@@ -268,15 +268,23 @@ class Sum(OneArgFunction):
     backward : 10 -> np.array([[1,2],[3,4]])
     """
 
+    def __init__(self, axis: Optional[int], keepdims: bool) -> None:
+        self._axis = axis
+        self._keepdims = keepdims
+
     @property
     def name(self) -> str:
         return "sum"
 
     def forward(self, x: NDFloatArray) -> NDFloatArray:
         self._xshape = x.shape
-        return np.array([np.sum(x)])
+        y = x.sum(axis=self._axis, keepdims=self._keepdims)
+        if np.isscalar(y):
+            return np.array([y])
+        return cast(NDFloatArray, y)
 
     def _backward_core(self, grad: Variable) -> Variable:
+        grad = _reshape_sum_backward(grad, self._xshape, self._axis, self._keepdims)
         return broadcast_to(grad, self._xshape)
 
 
@@ -452,6 +460,22 @@ class MatMul(TwoArgsFunction):
         return (gx, gw)
 
 
+def _reshape_sum_backward(grad: Variable, xshape: tuple[int, ...], axis: Optional[int], keepdims: bool) -> Variable:
+    ndim = len(xshape)
+
+    shape: tuple[int, ...]
+    if not (ndim == 0 or axis is None or keepdims):
+        if axis < 0:
+            raise NotImplementedError()
+
+        shape_list = list(grad.shape)
+        shape_list.insert(axis, 1)
+        shape = tuple(shape_list)
+    else:
+        shape = grad.shape
+    return grad.reshape(shape)
+
+
 def square(x: Variable) -> Variable:
     return Square()(x)
 
@@ -506,8 +530,8 @@ def transpose(x: Variable) -> Variable:
     return Transpose()(x)
 
 
-def sum(x: Variable) -> Variable:
-    return Sum()(x)
+def sum(x: Variable, axis: Optional[int] = None, keepdims: bool = False) -> Variable:
+    return Sum(axis, keepdims)(x)
 
 
 def broadcast_to(x: Variable, shape: tuple[int, ...]) -> Variable:
@@ -552,3 +576,13 @@ def linear(x: Variable, W: Variable, b: Optional[Variable]) -> Variable:
 
 def sigmoid(x: Variable) -> Variable:
     return 1 / (1 + exp(-x))
+
+
+def softmax1d(x: Variable) -> Variable:
+    return softmax(x, None)
+
+
+def softmax(x: Variable, axis: Optional[int] = 1) -> Variable:
+    y = exp(x)
+    sum_y = sum(y, axis=axis, keepdims=True)
+    return y / sum_y

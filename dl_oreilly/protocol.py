@@ -131,7 +131,7 @@ class Variable(ABC):
         return self.transpose()
 
     @abstractmethod
-    def sum(self) -> Variable:
+    def sum(self, axis: Optional[int] = None, keepdims: bool = False) -> Variable:
         ...
 
     @abstractmethod

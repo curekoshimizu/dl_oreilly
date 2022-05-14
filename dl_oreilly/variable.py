@@ -61,8 +61,8 @@ class Var(Variable):
     def transpose(self) -> Variable:
         return transpose(self)
 
-    def sum(self) -> Variable:
-        return sum(self)
+    def sum(self, axis: Optional[int] = None, keepdims: bool = False) -> Variable:
+        return sum(self, axis, keepdims)
 
     def __neg__(self) -> Variable:
         return neg(self)

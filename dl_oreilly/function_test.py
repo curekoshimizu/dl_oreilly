@@ -14,6 +14,8 @@ from .function import (
     mul,
     reshape,
     sin,
+    softmax,
+    softmax1d,
     square,
     sum,
     sum_to,
@@ -317,6 +319,21 @@ def test_sum() -> None:
     assert y.data == 6
     assert np.all(x.grad.data == np.ones(3))
 
+    x = Var(np.array([[1, 2, 3], [4, 5, 6]]))
+    y = sum(x, keepdims=True)
+    assert y.data == 21
+    assert y.shape == (1, 1)
+
+    x = Var(np.array([[1, 2, 3], [4, 5, 6]]))
+    y = sum(x, axis=0)
+    assert np.allclose(y.data, np.array([5, 7, 9]))
+    y.backward()
+    assert np.allclose(x.grad.data, np.array([[1, 1, 1], [1, 1, 1]]))
+
+    x = Var(np.random.randn(2, 3, 4, 5))
+    y = x.sum(keepdims=True)
+    assert y.shape == (1, 1, 1, 1)
+
 
 def test_broadcast_to() -> None:
     origin = np.random.rand(3)
@@ -391,3 +408,26 @@ def test_matmul_ndim2() -> None:
     assert z.data == 23
     assert np.all(x.grad.data == np.array([5, 9]))
     assert np.all(w.grad.data == np.array([[1, 1], [2, 2]]))
+
+
+def test_softmax1d() -> None:
+    x = Var(np.array([-0.61505778, -0.4290161, 0.31733289]))
+    y = softmax1d(x)
+    assert np.sum(y.data) == 1
+    assert np.allclose(y.data, np.array([0.21074602, 0.25383778, 0.5354162]))
+
+
+def test_softmax() -> None:
+    x = Var(
+        np.array(
+            [
+                [-0.615, -0.427, 0.317],
+                [-0.763, -0.249, 0.185],
+                [-0.520, -0.962, 0.578],
+                [-0.942, -0.503, 0.175],
+            ]
+        )
+    )
+    y = softmax(x)
+    for i in range(4):
+        assert np.isclose(np.sum(y.data[i]), 1)
