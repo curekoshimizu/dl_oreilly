@@ -8,7 +8,7 @@ import numpy as np
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
 from .config import enable_backprop
-from .function import add, div, mul, neg, pow, reshape, sub, sum, transpose
+from .function import add, div, get_item, mul, neg, pow, reshape, sub, sum, transpose
 from .graph import Graphviz
 from .protocol import Variable
 
@@ -121,6 +121,9 @@ class Var(Variable):
         if isinstance(other, int) or isinstance(other, float):
             other = np.array(other)
         return div(Var(other), self)
+
+    def __getitem__(self, slices: int) -> Variable:
+        return get_item(self, slices)
 
 
 class Parameter(Var):

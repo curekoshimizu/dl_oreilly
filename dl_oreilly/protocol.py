@@ -173,3 +173,7 @@ class Variable(ABC):
     @abstractmethod
     def __rtruediv__(self, other: NDFloatArray | float | int) -> Variable:
         ...
+
+    @abstractmethod
+    def __getitem__(self, slices: int) -> Variable:
+        ...
