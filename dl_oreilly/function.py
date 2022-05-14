@@ -323,6 +323,44 @@ class SumTo(OneArgFunction):
         return broadcast_to(grad, self._xshape)
 
 
+class GetItem(OneArgFunction):
+    def __init__(self, slices: int) -> None:
+        self._slices = slices
+
+    @property
+    def name(self) -> str:
+        return "get_item"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        y = x[self._slices]
+        if np.isscalar(y):
+            return np.array(y)
+        return cast(NDFloatArray, y)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        x = self.x
+        f = GetItemGrad(self._slices, x.shape)
+        return f(grad)
+
+
+class GetItemGrad(OneArgFunction):
+    def __init__(self, slices: int, in_shape: tuple[int, ...]) -> None:
+        self._slices = slices
+        self._in_shape = in_shape
+
+    @property
+    def name(self) -> str:
+        return "get_item_grad"
+
+    def forward(self, gy: NDFloatArray) -> NDFloatArray:
+        gx = np.zeros(self._in_shape)
+        np.add.at(gx, self._slices, gy)
+        return gx
+
+    def _backward_core(self, ggx: Variable) -> Variable:
+        return get_item(ggx, self._slices)
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -478,6 +516,10 @@ def broadcast_to(x: Variable, shape: tuple[int, ...]) -> Variable:
 
 def sum_to(x: Variable, shape: tuple[int, ...]) -> Variable:
     return SumTo(shape)(x)
+
+
+def get_item(x: Variable, slices: int) -> Variable:
+    return GetItem(slices)(x)
 
 
 def matmul(x: Variable, W: Variable) -> Variable:

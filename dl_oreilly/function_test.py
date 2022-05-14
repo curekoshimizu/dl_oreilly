@@ -9,6 +9,7 @@ from .function import (
     cos,
     diff_f,
     exp,
+    get_item,
     matmul,
     mul,
     reshape,
@@ -357,6 +358,14 @@ def test_sum_to() -> None:
 
     assert np.all(z.data == np.array([[1, 2, 3], [4, 5, 6]]))
     assert np.all(x.grad.data == np.ones((2, 3)))
+
+
+def test_get_item() -> None:
+    x = Var(np.array([[1, 2, 3], [4, 5, 6]]))
+    y = get_item(x, 1)
+    assert np.all(y.data == np.array([4, 5, 6]))
+    y.backward()
+    assert np.all(x.grad.data == np.array([[0, 0, 0], [1, 1, 1]]))
 
 
 def test_matmul_ndim1() -> None:
