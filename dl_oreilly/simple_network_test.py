@@ -6,6 +6,7 @@ from . import NDFloatArray
 from .function import mean_squared_error, sigmoid
 from .layers import Linear
 from .models import MLP, TwoLayerNet
+from .optimizers import SGD
 from .protocol import Variable
 from .variable import Var
 
@@ -115,8 +116,8 @@ def test_mlp_check_count(save: bool = False) -> None:
     y = Var(np.sin(2 * np.pi * x.data) + np.random.rand(100, 1), name="y")
 
     model = MLP(fc_output_sizes=(10, 1))
+    optimizer = SGD(lr=0.2).setup(model)
 
-    lr = 0.2
     iters = 10000
 
     for i in range(iters):
@@ -127,7 +128,5 @@ def test_mlp_check_count(save: bool = False) -> None:
         loss.backward()
         if loss.data < 0.25:
             break
-
-        for p in model.params():
-            p.data -= lr * p.grad.data
+        optimizer.update()
     assert i == 968
