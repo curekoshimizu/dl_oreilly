@@ -1,8 +1,7 @@
-import math
-
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .dataloaders import DataLoader
 from .datasets import Spiral
 from .function import softmax_cross_entropy
 from .models import MLP
@@ -10,30 +9,26 @@ from .optimizers import SGD
 from .variable import Var
 
 
-def test_spiral(save: bool = False) -> None:
+def test_spiral(save: bool = True) -> None:
     max_epoch = 300
     batch_size = 30
 
-    train_set = Spiral()
+    train_set = Spiral(train=True)
+    # test_set = Spiral(train=False)
+    train_loader = DataLoader(train_set, batch_size, shuffle=True)
+    # test_loader = DataLoader(test_set, batch_size, shuffle=False)
+
     np.random.seed(0)
     model = MLP((10, 3))
     optimizer = SGD(lr=1.0).setup(model)
 
     data_size = len(train_set)
-    max_iter = math.ceil(data_size / batch_size)
 
     trace_loss = []
     for epoch in range(max_epoch):
-        indexes = np.random.permutation(data_size)
         sum_loss = 0.0
 
-        for i in range(max_iter):
-            batch_indexes = indexes[i * batch_size : (i + 1) * batch_size]
-
-            batch = [train_set[i] for i in batch_indexes]
-            batch_x = Var(np.array([example[0] for example in batch]))
-            batch_t = Var(np.array([example[1] for example in batch]))
-
+        for batch_x, batch_t in train_loader:
             y = model(batch_x)
             loss = softmax_cross_entropy(y, batch_t)
             model.clear_grad()
