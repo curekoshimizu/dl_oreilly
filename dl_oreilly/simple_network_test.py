@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 
 from . import NDFloatArray
 from .function import mean_squared_error, sigmoid
@@ -21,7 +22,8 @@ def _save_figure(x: NDFloatArray, y_pred: NDFloatArray, y: NDFloatArray, save: b
     plt.savefig("plot.png")
 
 
-def test_simple_nn(save: bool = True) -> None:
+@pytest.mark.heavy
+def test_simple_nn(save: bool = False) -> None:
     np.random.seed(0)
     x = Var(np.random.rand(100, 1), name="x")
     y = Var(np.sin(2 * np.pi * x.data) + np.random.rand(100, 1), name="y")
@@ -33,7 +35,7 @@ def test_simple_nn(save: bool = True) -> None:
         return l2(sigmoid(l1(x)))
 
     lr = 0.2
-    iters = 1000
+    iters = 10000
 
     for i in range(iters):
         y_pred = predict(x)
@@ -43,12 +45,10 @@ def test_simple_nn(save: bool = True) -> None:
         l2.clear_grad()
         loss.backward()
 
-        print(loss.data)
-        # loss.save_graph()
-
         for ll in [l1, l2]:
             for p in ll.params():
                 p.data -= lr * p.grad.data
 
+    assert 0.01 < loss.data < 0.1
+
     _save_figure(x.data, y_pred.data, y.data, save)
-    assert False

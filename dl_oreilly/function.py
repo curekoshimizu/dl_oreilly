@@ -493,9 +493,9 @@ class MatMul(TwoArgsFunction):
 
     def forward(self, x: NDFloatArray, W: NDFloatArray) -> NDFloatArray:
         ret = x.dot(W)
-        if ret.ndim == 0:
+        if np.isscalar(ret):
             return np.array(ret)
-        return ret
+        return cast(NDFloatArray, ret)
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
         x, W = self.inputs
