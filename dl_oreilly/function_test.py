@@ -11,6 +11,7 @@ from .function import (
     exp,
     get_item,
     matmul,
+    mean_squared_error,
     mul,
     reshape,
     sin,
@@ -431,3 +432,24 @@ def test_softmax() -> None:
     y = softmax(x)
     for i in range(4):
         assert np.isclose(np.sum(y.data[i]), 1)
+
+
+def test_mean_squared_error() -> None:
+    x1 = Var(np.array([1.0, 2.0, 3.0]))
+    y1 = Var(np.array([1.1, 2.2, 3.3]))
+
+    z1 = mean_squared_error(x1, y1)
+    z1.backward()
+
+    x2 = Var(np.array([1.0, 2.0, 3.0]))
+    y2 = Var(np.array([1.1, 2.2, 3.3]))
+
+    diff = x2 - y2
+    z2 = (diff * diff).sum() / 3
+    z2.backward()
+
+    assert np.allclose(x1.data, x2.data)
+    assert np.allclose(y1.data, y2.data)
+    assert np.allclose(z1.data, z2.data)
+    assert np.allclose(x1.grad.data, x2.grad.data)
+    assert np.allclose(y1.grad.data, y2.grad.data)

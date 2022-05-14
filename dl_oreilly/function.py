@@ -369,6 +369,27 @@ class GetItemGrad(OneArgFunction):
         return get_item(ggx, self._slices)
 
 
+class MeanSquaredError(TwoArgsFunction):
+    @property
+    def name(self) -> str:
+        return "mean_squared_error"
+
+    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        diff = x - y
+        ret = (diff * diff).sum() / len(diff)
+        if np.isscalar(ret):
+            return np.array(ret)
+        return cast(NDFloatArray, ret)
+
+    def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
+        x0, x1 = self.inputs
+        diff = x0 - x1
+        gy = broadcast_to(grad, diff.shape)
+        gx0 = gy * diff * (2 / len(diff))
+        gx1 = -gx0
+        return gx0, gx1
+
+
 class Add(TwoArgsFunction):
     """
     f(x, y) = x + y
@@ -576,6 +597,10 @@ def linear(x: Variable, W: Variable, b: Optional[Variable]) -> Variable:
 
 def sigmoid(x: Variable) -> Variable:
     return 1 / (1 + exp(-x))
+
+
+def mean_squared_error(x0: Variable, x1: Variable) -> Variable:
+    return MeanSquaredError()(x0, x1)
 
 
 def softmax1d(x: Variable) -> Variable:
