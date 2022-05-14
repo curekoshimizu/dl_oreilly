@@ -492,12 +492,9 @@ class MatMul(TwoArgsFunction):
         return "matmul"
 
     def forward(self, x: NDFloatArray, W: NDFloatArray) -> NDFloatArray:
-        if (x.ndim == 1 and len(x) == 1) or (W.ndim == 1 and len(W) == 1):
-            ret = x * W
-        else:
-            ret = x.dot(W)
+        ret = x.dot(W)
         if ret.ndim == 0:
-            return np.array([ret])
+            return np.array(ret)
         return ret
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
