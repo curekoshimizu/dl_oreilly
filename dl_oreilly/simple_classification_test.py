@@ -3,7 +3,7 @@ import numpy as np
 
 from .dataloaders import DataLoader
 from .datasets import Spiral
-from .function import softmax_cross_entropy
+from .function import accuracy, softmax_cross_entropy
 from .models import MLP
 from .optimizers import SGD
 from .variable import Var
@@ -14,9 +14,7 @@ def test_spiral(save: bool = True) -> None:
     batch_size = 30
 
     train_set = Spiral(train=True)
-    test_set = Spiral(train=False)
     train_loader = DataLoader(train_set, batch_size, shuffle=True)
-    test_loader = DataLoader(test_set, batch_size, shuffle=False)
 
     np.random.seed(0)
     model = MLP((10, 3))
@@ -27,15 +25,18 @@ def test_spiral(save: bool = True) -> None:
     trace_loss = []
     for epoch in range(max_epoch):
         sum_loss = 0.0
+        sum_acc = 0.0
 
         for batch_x, batch_t in train_loader:
             y = model(batch_x)
             loss = softmax_cross_entropy(y, batch_t)
+            acc = accuracy(y, batch_t)
             model.clear_grad()
             loss.backward()
             optimizer.update()
 
             sum_loss += float(loss.data) * len(batch_t)
+            sum_acc += float(acc.data) * len(batch_t)
 
         ave_loss = sum_loss / data_size
         trace_loss.append(ave_loss)
