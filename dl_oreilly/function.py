@@ -706,3 +706,10 @@ def softmax_cross_entropy(x: Variable, t: Variable) -> Variable:
     # array([-0.62499391, -1.65968355, -1.97749028, -1.72480927])
     tlog_p = log_p[np.arange(n), t.data]
     return sum(tlog_p) / -n
+
+
+def accuracy(y: Variable, t: Variable) -> Variable:
+    pred = y.data.argmax(axis=1).reshape(t.shape)
+    result = pred == t.data
+    acc = result.mean()
+    return y.new_variable(acc)

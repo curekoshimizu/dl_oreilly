@@ -14,9 +14,9 @@ def test_spiral(save: bool = True) -> None:
     batch_size = 30
 
     train_set = Spiral(train=True)
-    # test_set = Spiral(train=False)
+    test_set = Spiral(train=False)
     train_loader = DataLoader(train_set, batch_size, shuffle=True)
-    # test_loader = DataLoader(test_set, batch_size, shuffle=False)
+    test_loader = DataLoader(test_set, batch_size, shuffle=False)
 
     np.random.seed(0)
     model = MLP((10, 3))

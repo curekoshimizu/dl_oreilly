@@ -4,6 +4,7 @@ from . import NDFloatArray
 from .function import (
     Exp,
     Square,
+    accuracy,
     add,
     broadcast_to,
     cos,
@@ -466,3 +467,18 @@ def test_soft_cross_entropy() -> None:
     y = model(x)
     loss = softmax_cross_entropy(y, t)
     assert np.isclose(loss.data, 1.4967442524053058)
+
+
+def test_accuracy() -> None:
+    y = Var(
+        np.array(
+            [
+                [0.2, 0.8, 0],
+                [0.1, 0.9, 0],
+                [0.8, 0.1, 0.1],
+            ]
+        )
+    )
+    t = Var(np.array([1, 2, 0]))
+    acc = accuracy(y, t)
+    assert np.isclose(acc.data, 2.0 / 3.0)
