@@ -21,7 +21,9 @@ class MLP(Model):
     MLP = Multi-Layer Perceptron
     """
 
-    def __init__(self, fc_output_sizes: tuple[int, ...], activation: Optional[Callable[[Variable], Variable]]) -> None:
+    def __init__(
+        self, fc_output_sizes: tuple[int, ...], activation: Optional[Callable[[Variable], Variable]] = None
+    ) -> None:
         super().__init__()
         self._layers: list[Layer] = []
 
