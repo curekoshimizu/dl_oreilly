@@ -11,7 +11,7 @@ class Graphviz:
         with tempfile.NamedTemporaryFile(mode="w+t") as f:
             f.writelines(map(lambda x: x + "\n", lines))
             f.flush()
-            cmd =["dot", f.name, "-T", "png", "-o", str(path)]
+            cmd = ["dot", f.name, "-T", "png", "-o", str(path)]
             ret = subprocess.run(cmd)
             # if ret.returncode != 0:
             #     import ipdb; ipdb.set_trace()
@@ -24,7 +24,7 @@ class Graphviz:
             label = label[:100] + "..."
         grad = variable.optional_grad
         if grad is not None:
-            label += f"\ngrad={grad.shape}".replace("("," ").replace(")", " ")
+            label += f"\ngrad={grad.shape}".replace("(", " ").replace(")", " ")
         return f'{id(variable)} [label="{label}", color=orange, style=filled]'
 
     def _dot_func(self, f: Function) -> str:

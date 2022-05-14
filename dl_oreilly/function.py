@@ -387,6 +387,8 @@ class MeanSquaredError(TwoArgsFunction):
         gy = broadcast_to(grad, diff.shape)
         gx0 = gy * diff * (2 / len(diff))
         gx1 = -gx0
+        assert gx0.shape == x0.shape
+        assert gx1.shape == x1.shape
         return gx0, gx1
 
 

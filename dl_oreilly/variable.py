@@ -36,6 +36,7 @@ class Var(Variable):
                 for x, grad in zip(xs, grads):
                     pre_grad = x.optional_grad
                     if pre_grad is None:
+                        assert grad.shape == x.data.shape, (x, grad)
                         x._set_grad(grad)
                     else:
                         x._set_grad(grad + pre_grad)
@@ -69,57 +70,57 @@ class Var(Variable):
 
     def __add__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         if not isinstance(other, Variable):
             other = Var(other)
         return add(self, other)
 
     def __sub__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         if not isinstance(other, Variable):
             other = Var(other)
         return sub(self, other)
 
     def __mul__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         if not isinstance(other, Variable):
             other = Var(other)
         return mul(self, other)
 
     def __truediv__(self, other: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         if not isinstance(other, Variable):
             other = Var(other)
         return div(self, other)
 
     def __pow__(self, exp: Variable | NDFloatArray | float | int) -> Variable:
         if isinstance(exp, int) or isinstance(exp, float):
-            exp = np.array(exp)
+            exp = np.array([exp])
         if not isinstance(exp, Variable):
             exp = Var(exp)
         return pow(self, exp)
 
     def __radd__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         return add(Var(other), self)
 
     def __rsub__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         return sub(Var(other), self)
 
     def __rmul__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         return mul(Var(other), self)
 
     def __rtruediv__(self, other: NDFloatArray | float | int) -> Variable:
         if isinstance(other, int) or isinstance(other, float):
-            other = np.array(other)
+            other = np.array([other])
         return div(Var(other), self)
 
     def __getitem__(self, slices: int) -> Variable:
