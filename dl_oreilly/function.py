@@ -378,7 +378,7 @@ class MeanSquaredError(TwoArgsFunction):
         diff = x - y
         ret = (diff * diff).sum() / len(diff)
         if np.isscalar(ret):
-            return np.array([ret])
+            return np.array(ret)
         return cast(NDFloatArray, ret)
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
@@ -402,6 +402,7 @@ class Add(TwoArgsFunction):
         return "add"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        assert x.shape == y.shape
         return x + y
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
@@ -418,6 +419,7 @@ class Sub(TwoArgsFunction):
         return "sub"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        assert x.shape == y.shape
         return x - y
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
@@ -434,6 +436,7 @@ class Mul(TwoArgsFunction):
         return "mul"
 
     def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
+        assert x.shape == y.shape
         return x * y
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:

@@ -55,19 +55,20 @@ class Linear(Layer):
         self._dtype = dtype
 
         self.W: Optional[Parameter] = None
-        if nobias:
-            self.b = None
-        else:
-            zero = np.zeros(out_size, dtype=dtype)
-            self.b = Parameter(zero, name="b")
+        self.b = None
 
     def _init_w(self, in_size: int) -> None:
         w_data = np.random.randn(in_size, self._out_size).astype(self._dtype) * np.sqrt(1 / in_size)
         self.W = Parameter(w_data, name="W")
 
+    def _init_b(self, in_size: int) -> None:
+        zero = np.zeros((in_size, self._out_size), dtype=self._dtype)
+        self.b = Parameter(zero, name="b")
+
     def forward(self, x: Variable) -> Variable:
         if self.W is None:
             self._init_w(x.shape[1])
+            self._init_b(x.shape[0])
         assert self.W is not None
 
         return linear(x, self.W, self.b)

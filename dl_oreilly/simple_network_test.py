@@ -32,7 +32,7 @@ def test_simple_nn(save: bool = True) -> None:
         return l2(sigmoid(l1(x)))
 
     lr = 0.2
-    iters = 100
+    iters = 1000
 
     for i in range(iters):
         y_pred = predict(x)
@@ -40,13 +40,12 @@ def test_simple_nn(save: bool = True) -> None:
 
         l1.clear_grad()
         l2.clear_grad()
-        # loss.backward(retain_grad=True)
-        #
-        # loss.save_graph()
-        # for ll in [l1, l2]:
-        #     for p in ll.params():
-        #         print(p.name)
-        #         print("shape", p.grad.data.shape, p.data.shape)
-        #         p.data -= lr * p.grad.data
+        loss.backward()
+
+        for ll in [l1, l2]:
+            for p in ll.params():
+                print(p.name)
+                print("shape", p.grad.data.shape, p.data.shape)
+                p.data -= lr * p.grad.data
 
     _save_figure(x.data, y.data, save)
