@@ -4,9 +4,11 @@ import numpy as np
 
 from . import NDFloatArray
 
+Transform = Callable[[NDFloatArray], NDFloatArray]
+
 
 class Compose:
-    def __init__(self, transforms: list[Callable[[NDFloatArray], NDFloatArray]]) -> None:
+    def __init__(self, transforms: list[Transform]) -> None:
         self._transforms = transforms
 
     def __call__(self, x: NDFloatArray) -> NDFloatArray:
@@ -38,8 +40,6 @@ class Normalize:
 
 
 class Flatten:
-    """Flatten a NumPy array."""
-
     def __call__(self, array: NDFloatArray) -> NDFloatArray:
         return array.flatten()
 
