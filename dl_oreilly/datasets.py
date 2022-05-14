@@ -7,11 +7,8 @@ from . import NDFloatArray, NDIntArray
 
 class Dataset(ABC):
     def __init__(self, train: bool = True) -> None:
-        self._data: NDFloatArray
-        self._label: NDIntArray
-
         self._train = train
-        self.prepare()
+        self._data, self._label = self._prepare()
 
     def __getitem__(self, index: int) -> tuple[float, int]:
         return self._data[index], self._label[index]
@@ -19,16 +16,21 @@ class Dataset(ABC):
     def __len__(self) -> int:
         return len(self._data)
 
-    def prepare(self) -> None:
-        self._data, self._label = self._prepare_impl()
+    @property
+    def data(self) -> NDFloatArray:
+        return self._data
+
+    @property
+    def label(self) -> NDIntArray:
+        return self._label
 
     @abstractmethod
-    def _prepare_impl(self) -> tuple[NDFloatArray, NDIntArray]:
+    def _prepare(self) -> tuple[NDFloatArray, NDIntArray]:
         ...
 
 
 class Spiral(Dataset):
-    def _prepare_impl(self) -> tuple[NDFloatArray, NDIntArray]:
+    def _prepare(self) -> tuple[NDFloatArray, NDIntArray]:
         seed = 1984 if self._train else 2020
         np.random.seed(seed)
 
