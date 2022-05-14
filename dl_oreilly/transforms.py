@@ -1,8 +1,18 @@
-from typing import Any, Type, cast
+from typing import Any, Callable, Type, cast
 
 import numpy as np
 
 from . import NDFloatArray
+
+
+class Compose:
+    def __init__(self, transforms: list[Callable[[NDFloatArray], NDFloatArray]]) -> None:
+        self._transforms = transforms
+
+    def __call__(self, x: NDFloatArray) -> NDFloatArray:
+        for t in self._transforms:
+            x = t(x)
+        return x
 
 
 class Normalize:
