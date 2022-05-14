@@ -378,7 +378,7 @@ class MeanSquaredError(TwoArgsFunction):
         diff = x - y
         ret = (diff * diff).sum() / len(diff)
         if np.isscalar(ret):
-            return np.array(ret)
+            return np.array([ret])
         return cast(NDFloatArray, ret)
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
