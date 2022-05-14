@@ -32,6 +32,7 @@ class Function(Protocol):
 
 class Variable(ABC):
     def __init__(self, data: NDFloatArray, name: Optional[str]) -> None:
+        assert data.ndim > 0
         self._data = data
         self._name = name
         self._grad: Optional[Variable] = None

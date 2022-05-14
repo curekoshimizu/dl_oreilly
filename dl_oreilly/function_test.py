@@ -95,8 +95,8 @@ def test_functions() -> None:
 
 def test_add() -> None:
     # forward
-    x = Var(np.array(2))
-    y = Var(np.array(3))
+    x = Var(np.array([2]))
+    y = Var(np.array([3]))
     z = add(x, y)
     assert z.data == 5.0
 
@@ -106,15 +106,15 @@ def test_add() -> None:
     assert y.grad.data == 1.0
 
     # forward
-    w = Var(np.array(1))
-    x = Var(np.array(2))
-    y = Var(np.array(3))
+    w = Var(np.array([1]))
+    x = Var(np.array([2]))
+    y = Var(np.array([3]))
     z = add(add(w, x), y)
     assert z.data == 6.0
 
 
 def test_add_same_variable() -> None:
-    x = Var(np.array(3))
+    x = Var(np.array([3]))
     y = add(x, x)
     y.backward()
     assert y.data == 6.0
@@ -123,7 +123,7 @@ def test_add_same_variable() -> None:
 
 # @pytest.mark.xfail(reason="implement generation")
 def test_add_same_variable_2() -> None:
-    x = Var(np.array(3), name="x")
+    x = Var(np.array([3]), name="x")
     a = add(x, x)
     a.name = "a"
     b = add(a, x)
@@ -134,7 +134,7 @@ def test_add_same_variable_2() -> None:
     assert y.data == 12.0
     assert x.grad.data == 4.0
 
-    w = Var(np.array(3), "w")
+    w = Var(np.array([3]), "w")
     z = add(add(add(w, w), w), w)
     z.name = "z"
     z.backward()
@@ -143,8 +143,8 @@ def test_add_same_variable_2() -> None:
 
 
 def test_square_and_add() -> None:
-    x = Var(np.array(2.0))
-    y = Var(np.array(3.0))
+    x = Var(np.array([2.0]))
+    y = Var(np.array([3.0]))
     z = add(square(x), square(y))
     z.backward()
     assert z.data == 13.0
@@ -153,7 +153,7 @@ def test_square_and_add() -> None:
 
 
 def test_clear_grad() -> None:
-    x = Var(np.array(3.0))
+    x = Var(np.array([3.0]))
     y = add(x, x)
     y.backward()
     assert x.grad.data == 2.0
@@ -165,9 +165,9 @@ def test_clear_grad() -> None:
 
 
 def test_mul() -> None:
-    x = Var(np.array(3.0))
-    y = Var(np.array(2.0))
-    z = Var(np.array(1.0))
+    x = Var(np.array([3.0]))
+    y = Var(np.array([2.0]))
+    z = Var(np.array([1.0]))
     w = add(mul(x, y), z)
     w.backward()
     assert w.data == 7.0
@@ -176,7 +176,7 @@ def test_mul() -> None:
 
 
 def test_generateion() -> None:
-    x = Var(np.array(2.0), name="x")
+    x = Var(np.array([2.0]), name="x")
     a = square(x)
     a.name = "a"
     b = square(a)
@@ -210,7 +210,7 @@ def test_diff() -> None:
     def f(x: Variable) -> Variable:
         return 4 * x * x * x + x
 
-    x = Var(np.array(2.0))
+    x = Var(np.array([2.0]))
     fx = diff_f(x, f, n=0)
     assert fx.data == 34
 
@@ -225,7 +225,7 @@ def test_diff() -> None:
 
 
 def test_diff_exp() -> None:
-    x = Var(np.array(2.0))
+    x = Var(np.array([2.0]))
     fx = diff_f(x, exp, n=0)
     assert fx.data == np.exp(2)
 
@@ -240,7 +240,7 @@ def test_diff_exp() -> None:
 
 
 def test_diff_sin() -> None:
-    x = Var(np.array(2.0))
+    x = Var(np.array([2.0]))
     fx = diff_f(x, sin, n=0)
     assert fx.data == np.sin(2)
 
@@ -258,7 +258,7 @@ def test_diff_sin() -> None:
 
 
 def test_diff_cos() -> None:
-    x = Var(np.array(2.0))
+    x = Var(np.array([2.0]))
     fx = diff_f(x, cos, n=0)
     assert fx.data == np.cos(2)
 
@@ -276,7 +276,7 @@ def test_diff_cos() -> None:
 
 
 def test_diff_tanh() -> None:
-    x = Var(np.array(2.0))
+    x = Var(np.array([2.0]))
     fx = diff_f(x, tanh, n=0)
     assert fx.data == np.tanh(2)
 

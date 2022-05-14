@@ -156,14 +156,14 @@ class Pow(OneArgFunction):
     """
 
     def __init__(self, exp: Variable) -> None:
-        self._exp = exp.data
+        self._exp = exp
 
     @property
     def name(self) -> str:
         return "pow"
 
     def forward(self, x: NDFloatArray) -> NDFloatArray:
-        return x**self._exp
+        return x**self._exp.data
 
     def _backward_core(self, grad: Variable) -> Variable:
         return self._exp * (self.x ** (self._exp - 1)) * grad
@@ -378,7 +378,7 @@ class MeanSquaredError(TwoArgsFunction):
         diff = x - y
         ret = (diff * diff).sum() / len(diff)
         if np.isscalar(ret):
-            return np.array(ret)
+            return np.array([ret])
         return cast(NDFloatArray, ret)
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:

@@ -11,8 +11,8 @@ def _rosenblock_loop(update: Callable[[Variable, Variable], None], create_graph:
     def rosenblock(x0: Variable, v1: Variable) -> Variable:
         return 100 * (x1 - x0 * x0) ** 2 + (x0 - 1) * (x0 - 1)
 
-    x0: Variable = Var(np.array(0.0), name="x0")
-    x1: Variable = Var(np.array(2.0), name="x1")
+    x0: Variable = Var(np.array([0.0]), name="x0")
+    x1: Variable = Var(np.array([2.0]), name="x1")
 
     max_loop = 100000
 
@@ -45,7 +45,7 @@ def _simple_func_loop(update: Callable[[Variable], None], create_graph: bool) ->
     def simple_func(x: Variable) -> Variable:
         return x**4 - 2 * x * x
 
-    x: Variable = Var(np.array(2.0), name="x")
+    x: Variable = Var(np.array([2.0]), name="x")
 
     max_loop = 100000
 
