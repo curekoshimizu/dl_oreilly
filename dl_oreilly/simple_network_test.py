@@ -8,12 +8,13 @@ from .protocol import Variable
 from .variable import Var
 
 
-def _save_figure(x: NDFloatArray, y: NDFloatArray, save: bool) -> None:
+def _save_figure(x: NDFloatArray, y_pred: NDFloatArray, y: NDFloatArray, save: bool) -> None:
     if not save:
         return
 
     plt.figure(figsize=(10, 7.5))
-    plt.scatter(x, y)
+    plt.scatter(x, y_pred, c="green")
+    plt.scatter(x, y, c="red")
     plt.xlabel("x")
     plt.ylabel("y")
     plt.grid()
@@ -42,10 +43,12 @@ def test_simple_nn(save: bool = True) -> None:
         l2.clear_grad()
         loss.backward()
 
+        print(loss.data)
+        # loss.save_graph()
+
         for ll in [l1, l2]:
             for p in ll.params():
-                print(p.name)
-                print("shape", p.grad.data.shape, p.data.shape)
                 p.data -= lr * p.grad.data
 
-    _save_figure(x.data, y.data, save)
+    _save_figure(x.data, y_pred.data, y.data, save)
+    assert False

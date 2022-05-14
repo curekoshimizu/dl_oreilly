@@ -401,12 +401,17 @@ class Add(TwoArgsFunction):
     def name(self) -> str:
         return "add"
 
-    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
-        assert x.shape == y.shape
-        return x + y
+    def forward(self, x0: NDFloatArray, x1: NDFloatArray) -> NDFloatArray:
+        self._x0shape = x0.shape
+        self._x1shape = x1.shape
+        return x0 + x1
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        return (grad, grad)
+        gx0, gx1 = grad, grad
+        if self._x0shape != self._x1shape:  # for broadcaset
+            gx0 = sum_to(gx0, self._x0shape)
+            gx1 = sum_to(gx1, self._x1shape)
+        return gx0, gx1
 
 
 class Sub(TwoArgsFunction):
@@ -418,12 +423,17 @@ class Sub(TwoArgsFunction):
     def name(self) -> str:
         return "sub"
 
-    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
-        assert x.shape == y.shape
-        return x - y
+    def forward(self, x0: NDFloatArray, x1: NDFloatArray) -> NDFloatArray:
+        self._x0shape = x0.shape
+        self._x1shape = x1.shape
+        return x0 - x1
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        return (grad, -grad)
+        gx0, gx1 = grad, -grad
+        if self._x0shape != self._x1shape:  # for broadcaset
+            gx0 = sum_to(gx0, self._x0shape)
+            gx1 = sum_to(gx1, self._x1shape)
+        return gx0, gx1
 
 
 class Mul(TwoArgsFunction):
@@ -435,13 +445,18 @@ class Mul(TwoArgsFunction):
     def name(self) -> str:
         return "mul"
 
-    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
-        assert x.shape == y.shape
-        return x * y
+    def forward(self, x0: NDFloatArray, x1: NDFloatArray) -> NDFloatArray:
+        self._x0shape = x0.shape
+        self._x1shape = x1.shape
+        return x0 * x1
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        x1, x2 = self.inputs
-        return (grad * x2, grad * x1)
+        x0, x1 = self.inputs
+        gx0, gx1 = grad * x1, grad * x0
+        if self._x0shape != self._x1shape:  # for broadcaset
+            gx0 = sum_to(gx0, self._x0shape)
+            gx1 = sum_to(gx1, self._x1shape)
+        return gx0, gx1
 
 
 class Div(TwoArgsFunction):
@@ -453,12 +468,18 @@ class Div(TwoArgsFunction):
     def name(self) -> str:
         return "div"
 
-    def forward(self, x: NDFloatArray, y: NDFloatArray) -> NDFloatArray:
-        return x / y
+    def forward(self, x0: NDFloatArray, x1: NDFloatArray) -> NDFloatArray:
+        self._x0shape = x0.shape
+        self._x1shape = x1.shape
+        return x0 / x1
 
     def _backward_core(self, grad: Variable) -> tuple[Variable, Variable]:
-        x1, x2 = self.inputs
-        return (grad / x2, -grad * x1 / x2 / x2)
+        x0, x1 = self.inputs
+        gx0, gx1 = grad / x1, grad * (-x0 / x1 / x1)
+        if self._x0shape != self._x1shape:  # for broadcaset
+            gx0 = sum_to(gx0, self._x0shape)
+            gx1 = sum_to(gx1, self._x1shape)
+        return gx0, gx1
 
 
 class MatMul(TwoArgsFunction):
