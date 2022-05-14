@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import NDFloatArray
 from .config import Config
@@ -130,6 +131,23 @@ class Exp(OneArgFunction):
 
     def _backward_core(self, grad: Variable) -> Variable:
         return exp(self.x) * grad
+
+
+class Log(OneArgFunction):
+    """
+    f(x) = log(x)
+    f'(x) = 1/x
+    """
+
+    @property
+    def name(self) -> str:
+        return "log"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.log(x)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        return grad / self.x
 
 
 class Neg(OneArgFunction):
@@ -331,8 +349,28 @@ class SumTo(OneArgFunction):
         return broadcast_to(grad, self._xshape)
 
 
+class Clip(OneArgFunction):
+    def __init__(self, x_min: float, x_max: float) -> None:
+        self._x_min = x_min
+        self._x_max = x_max
+
+    @property
+    def name(self) -> str:
+        return "clip"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        y = np.clip(x, self._x_min, self._x_max)
+        return cast(NDFloatArray, y)
+
+    def _backward_core(self, gy: Variable) -> Variable:
+        x = self._input
+        mask = (x.data >= self._x_min) * (x.data <= self._x_max)
+        gx = gy * cast(NDFloatArray, mask)
+        return gx
+
+
 class GetItem(OneArgFunction):
-    def __init__(self, slices: int) -> None:
+    def __init__(self, slices: int | tuple[NDArray[Any], ...]) -> None:
         self._slices = slices
 
     @property
@@ -352,7 +390,7 @@ class GetItem(OneArgFunction):
 
 
 class GetItemGrad(OneArgFunction):
-    def __init__(self, slices: int, in_shape: tuple[int, ...]) -> None:
+    def __init__(self, slices: int | tuple[NDArray[Any], ...], in_shape: tuple[int, ...]) -> None:
         self._slices = slices
         self._in_shape = in_shape
 
@@ -531,6 +569,10 @@ def exp(x: Variable) -> Variable:
     return Exp()(x)
 
 
+def log(x: Variable) -> Variable:
+    return Log()(x)
+
+
 def neg(x: Variable) -> Variable:
     return Neg()(x)
 
@@ -589,7 +631,11 @@ def sum_to(x: Variable, shape: tuple[int, ...]) -> Variable:
     return SumTo(shape)(x)
 
 
-def get_item(x: Variable, slices: int) -> Variable:
+def clip(x: Variable, x_min: float, x_max: float) -> Variable:
+    return Clip(x_min, x_max)(x)
+
+
+def get_item(x: Variable, slices: int | tuple[NDArray[Any], ...]) -> Variable:
     return GetItem(slices)(x)
 
 
@@ -637,3 +683,26 @@ def softmax(x: Variable, axis: Optional[int] = 1) -> Variable:
     y = exp(x)
     sum_y = sum(y, axis=axis, keepdims=True)
     return y / sum_y
+
+
+def softmax_cross_entropy(x: Variable, t: Variable) -> Variable:
+    n = x.shape[0]
+    assert t.shape == (n,)
+
+    p = softmax(x)
+    p = clip(p, 1e-15, 1.0)
+    log_p = log(p)
+
+    # example
+    # log_p
+    # array([[-1.55738458, -1.37022841, -0.62499391★],
+    #        [-1.65968355★, -1.14549491, -0.70981659],
+    #        [-1.53500807, -1.97749028★, -0.43675478],
+    #        [-1.72480927★, -1.28536242, -0.6065244 ]])
+    #
+    # np.arange = (array([0, 1, 2, 3])
+    # t.data = array([2, 0, 1, 0]))
+    #
+    # array([-0.62499391, -1.65968355, -1.97749028, -1.72480927])
+    tlog_p = log_p[np.arange(n), t.data]
+    return sum(tlog_p) / -n

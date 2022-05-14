@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional, Protocol
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import NDFloatArray
 
@@ -177,5 +178,5 @@ class Variable(ABC):
         ...
 
     @abstractmethod
-    def __getitem__(self, slices: int) -> Variable:
+    def __getitem__(self, slices: int | tuple[NDArray[Any], ...]) -> Variable:
         ...

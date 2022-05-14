@@ -17,12 +17,14 @@ from .function import (
     sin,
     softmax,
     softmax1d,
+    softmax_cross_entropy,
     square,
     sum,
     sum_to,
     tanh,
     transpose,
 )
+from .models import MLP
 from .protocol import Variable
 from .variable import Var
 
@@ -453,3 +455,14 @@ def test_mean_squared_error() -> None:
     assert np.allclose(z1.data, z2.data)
     assert np.allclose(x1.grad.data, x2.grad.data)
     assert np.allclose(y1.grad.data, y2.grad.data)
+
+
+def test_soft_cross_entropy() -> None:
+    np.random.seed(0)
+    model = MLP((10, 3))
+
+    x = Var(np.array([[0.2, -0.4], [0.3, 0.5], [1.3, -3.2], [2.1, 0.3]]))
+    t = Var(np.array([2, 0, 1, 0]))
+    y = model(x)
+    loss = softmax_cross_entropy(y, t)
+    assert np.isclose(loss.data, 1.4967442524053058)

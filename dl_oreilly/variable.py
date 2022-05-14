@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import NDFloatArray
 from .backward_helper import _FunctionPriorityQueue
@@ -123,7 +124,7 @@ class Var(Variable):
             other = np.array([other])
         return div(Var(other), self)
 
-    def __getitem__(self, slices: int) -> Variable:
+    def __getitem__(self, slices: int | tuple[NDArray[Any], ...]) -> Variable:
         return get_item(self, slices)
 
 
