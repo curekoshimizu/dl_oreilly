@@ -1,6 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
+from .config import test_mode
 from .function import (
     Exp,
     Square,
@@ -9,6 +10,7 @@ from .function import (
     broadcast_to,
     cos,
     diff_f,
+    dropout,
     exp,
     get_item,
     matmul,
@@ -482,3 +484,15 @@ def test_accuracy() -> None:
     t = Var(np.array([1, 2, 0]))
     acc = accuracy(y, t)
     assert np.isclose(acc.data, 2.0 / 3.0)
+
+
+def test_dropout() -> None:
+    n = 100
+    np.random.seed(0)
+    x = Var(np.ones(n))
+    y = dropout(x)
+    assert abs(y.sum().data[0] - n) < 5  # 5% error
+    with test_mode():
+        z = dropout(x)
+        print(z)
+        assert np.all(z.data == x.data)

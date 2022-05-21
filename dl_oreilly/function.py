@@ -731,3 +731,12 @@ def accuracy(y: Variable, t: Variable) -> Variable:
 
 def relu(x: Variable) -> Variable:
     return ReLU()(x)
+
+
+def dropout(x: Variable, dropout_ratio: float = 0.5) -> Variable:
+    if Config.train:
+        msk = np.random.rand(*x.shape) > dropout_ratio
+        scale = np.array(1.0 - dropout_ratio).astype(x.dtype)
+        return x * msk / scale  # type:ignore
+    else:
+        return x

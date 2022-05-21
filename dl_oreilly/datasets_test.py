@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 
 from . import NDFloatArray
 from .config import no_grad
@@ -32,6 +33,7 @@ def test_mnist_data(save: bool = False) -> None:
     _save_figure(x, save)
 
 
+@pytest.mark.heavy
 def test_mnist_network() -> None:
     max_epoch = 5
     batch_size = 100

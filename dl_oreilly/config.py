@@ -4,6 +4,7 @@ from typing import Iterator
 
 class Config:
     enable_backprop = True
+    train = True
 
 
 @contextlib.contextmanager
@@ -20,3 +21,13 @@ def enable_backprop(flag: bool) -> Iterator[None]:
         yield
     finally:
         Config.enable_backprop = old
+
+
+@contextlib.contextmanager
+def test_mode() -> Iterator[None]:
+    old = Config.train
+    Config.train = False
+    try:
+        yield
+    finally:
+        Config.train = old
