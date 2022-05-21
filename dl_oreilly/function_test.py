@@ -494,5 +494,4 @@ def test_dropout() -> None:
     assert abs(y.sum().data[0] - n) < 5  # 5% error
     with test_mode():
         z = dropout(x)
-        print(z)
         assert np.all(z.data == x.data)
