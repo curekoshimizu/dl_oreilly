@@ -5,7 +5,7 @@ from . import NDFloatArray
 from .config import no_grad
 from .dataloaders import DataLoader
 from .datasets import MNIST
-from .function import accuracy, softmax_cross_entropy
+from .function import accuracy, relu, softmax_cross_entropy
 from .models import MLP
 from .optimizers import SGD
 
@@ -43,7 +43,7 @@ def test_mnist_network() -> None:
     test_loader = DataLoader(test_set, batch_size, shuffle=False)
 
     np.random.seed(0)
-    model = MLP((hidden_size, 10))
+    model = MLP((hidden_size, hidden_size, 10), activation=relu)
     optimizer = SGD().setup(model)
 
     for epoch in range(max_epoch):
@@ -77,4 +77,4 @@ def test_mnist_network() -> None:
                 sum_acc += float(acc.data) * len(t)
         print(f"test_loss : {sum_loss/len(test_set):.4f}, accuracy: {sum_acc/len(test_set):.4f}")
 
-    assert sum_acc > 0.85
+    assert sum_acc > 0.92

@@ -407,6 +407,20 @@ class GetItemGrad(OneArgFunction):
         return get_item(ggx, self._slices)
 
 
+class ReLU(OneArgFunction):
+    @property
+    def name(self) -> str:
+        return "relu"
+
+    def forward(self, x: NDFloatArray) -> NDFloatArray:
+        return np.maximum(x, 0.0)
+
+    def _backward_core(self, grad: Variable) -> Variable:
+        x = self.x
+        mask = x.data > 0
+        return grad * mask  # type:ignore
+
+
 class MeanSquaredError(TwoArgsFunction):
     @property
     def name(self) -> str:
@@ -713,3 +727,7 @@ def accuracy(y: Variable, t: Variable) -> Variable:
     result = pred == t.data
     acc = result.mean()
     return y.new_variable(acc)
+
+
+def relu(x: Variable) -> Variable:
+    return ReLU()(x)
