@@ -9,7 +9,7 @@ from .optimizers import SGD
 from .variable import Var
 
 
-def test_spiral(save: bool = True) -> None:
+def test_spiral(save: bool = False) -> None:
     max_epoch = 300
     batch_size = 30
 

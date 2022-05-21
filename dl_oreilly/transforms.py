@@ -11,6 +11,9 @@ class Compose:
     def __init__(self, transforms: list[Transform]) -> None:
         self._transforms = transforms
 
+    def name(self) -> str:
+        return "compose"
+
     def __call__(self, x: NDFloatArray) -> NDFloatArray:
         for t in self._transforms:
             x = t(x)
@@ -21,6 +24,9 @@ class Normalize:
     def __init__(self, mean: float | NDFloatArray = 0.0, std: float | NDFloatArray = 1.0) -> None:
         self._mean = mean
         self._std = std
+
+    def name(self) -> str:
+        return "normalize"
 
     def __call__(self, array: NDFloatArray) -> NDFloatArray:
         mean, std = self._mean, self._std
@@ -40,6 +46,9 @@ class Normalize:
 
 
 class Flatten:
+    def name(self) -> str:
+        return "flatten"
+
     def __call__(self, array: NDFloatArray) -> NDFloatArray:
         return array.flatten()
 
@@ -48,15 +57,24 @@ class AsType:
     def __init__(self, dtype: Type[Any]) -> None:
         self._dtype = dtype
 
+    def name(self) -> str:
+        return "as_type"
+
     def __call__(self, array: NDFloatArray) -> NDFloatArray:
         return array.astype(self._dtype)
 
 
 class ToFloat(AsType):
     def __init__(self, dtype: Type[np.float_] = np.float32) -> None:
-        self.dtype = dtype
+        self._dtype = dtype
+
+    def name(self) -> str:
+        return "to_float"
 
 
 class ToInt(AsType):
     def __init__(self, dtype: Type[np.int_] = np.int_) -> None:
-        self.dtype = dtype
+        self._dtype = dtype
+
+    def name(self) -> str:
+        return "to_int"
