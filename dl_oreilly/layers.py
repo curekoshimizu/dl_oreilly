@@ -149,24 +149,24 @@ def _im2col_array(
     img: NDFloatArray, kernel_size: tuple[int, int], stride: int, pad: int, to_matrix: bool = True
 ) -> NDFloatArray:
 
-    N, C, H, W = img.shape
-    KH, KW = kernel_size
-    SH, SW = (stride, stride)
-    PH, PW = (pad, pad)
-    OH = get_conv_outsize(H, KH, SH, PH)
-    OW = get_conv_outsize(W, KW, SW, PW)
+    n, c, h, w = img.shape
+    kh, kw = kernel_size
+    sh, sw = (stride, stride)
+    ph, pw = (pad, pad)
+    OH = get_conv_outsize(h, kh, sh, ph)
+    OW = get_conv_outsize(w, kw, sw, pw)
 
-    img = np.pad(img, ((0, 0), (0, 0), (PH, PH + SH - 1), (PW, PW + SW - 1)), mode="constant", constant_values=(0,))
-    col: NDFloatArray = np.ndarray((N, C, KH, KW, OH, OW), dtype=img.dtype)
+    img = np.pad(img, ((0, 0), (0, 0), (ph, ph + sh - 1), (pw, pw + sw - 1)), mode="constant", constant_values=(0,))
+    col: NDFloatArray = np.ndarray((n, c, kh, kw, OH, OW), dtype=img.dtype)
 
-    for j in range(KH):
-        j_lim = j + SH * OH
-        for i in range(KW):
-            i_lim = i + SW * OW
-            col[:, :, j, i, :, :] = img[:, :, j:j_lim:SH, i:i_lim:SW]
+    for j in range(kh):
+        j_lim = j + sh * OH
+        for i in range(kw):
+            i_lim = i + sw * OW
+            col[:, :, j, i, :, :] = img[:, :, j:j_lim:sh, i:i_lim:sw]
 
     if to_matrix:
-        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((N * OH * OW, -1))
+        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((n * OH * OW, -1))
 
     return col
 
