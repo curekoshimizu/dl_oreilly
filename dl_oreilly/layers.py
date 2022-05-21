@@ -25,6 +25,32 @@ class Layer(ABC):
         output = self.forward(x)
         return output
 
+    def _flatten_params(self, params_dict: dict[str, Variable], parent_key: str = "") -> None:
+        for name in self._params:
+            obj = self.__dict__[name]
+            key = parent_key + "/" + name if parent_key else name
+            if isinstance(obj, Layer):
+                obj._flatten_params(params_dict, key)
+            else:
+                params_dict[key] = obj
+
+    def save_weights(self, path: pathlib.Path) -> None:
+        params_dict: dict[str, Variable] = {}
+        self._flatten_params(params_dict)
+        array_dict = {key: param.data for key, param in params_dict.items()}
+        try:
+            np.savez_compressed(str(path), **array_dict)
+        except (Exception, KeyboardInterrupt):
+            if path.exists():
+                path.unlink()
+
+    def load_weights(self, path: pathlib.Path) -> None:
+        npz = np.load(str(path))
+        params_dict: dict[str, Variable] = {}
+        self._flatten_params(params_dict)
+        for key, param in params_dict.items():
+            param.data = npz[key]
+
     @abstractmethod
     def forward(self, x: Variable) -> Variable:
         ...
