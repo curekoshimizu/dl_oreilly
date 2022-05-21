@@ -12,6 +12,7 @@ from .function import (
     diff_f,
     dropout,
     exp,
+    get_conv_outsize,
     get_item,
     matmul,
     mean_squared_error,
@@ -495,3 +496,9 @@ def test_dropout() -> None:
     with test_mode():
         z = dropout(x)
         assert np.all(z.data == x.data)
+
+
+def test_get_conv_outsize() -> None:
+    assert get_conv_outsize(input_size=4, kernel_size=3, stride=1, pad=0) == 2
+    assert get_conv_outsize(input_size=4, kernel_size=3, stride=1, pad=1) == 4
+    assert get_conv_outsize(input_size=7, kernel_size=3, stride=2, pad=0) == 3

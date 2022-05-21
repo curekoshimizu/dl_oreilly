@@ -740,3 +740,41 @@ def dropout(x: Variable, dropout_ratio: float = 0.5) -> Variable:
         return x * msk / scale  # type:ignore
     else:
         return x
+
+
+def pooling(x: Variable, kernel_size: int, stride: int = 1, pad: int = 0) -> Variable:
+    col = im2col_array(x.data, (kernel_size, kernel_size), stride, pad, to_matrix=False)
+
+    n, c, kh, kw, oh, ow = col.shape
+    col = col.reshape(n, c, kh * kw, oh, ow)
+    return x.new_variable(col.max(axis=2))
+
+
+def im2col_array(
+    img: NDFloatArray, kernel_size: tuple[int, int], stride: int, pad: int, to_matrix: bool = True
+) -> NDFloatArray:
+
+    n, c, h, w = img.shape
+    kh, kw = kernel_size
+    sh, sw = (stride, stride)
+    ph, pw = (pad, pad)
+    OH = get_conv_outsize(h, kh, sh, ph)
+    OW = get_conv_outsize(w, kw, sw, pw)
+
+    img = np.pad(img, ((0, 0), (0, 0), (ph, ph + sh - 1), (pw, pw + sw - 1)), mode="constant", constant_values=(0,))
+    col: NDFloatArray = np.ndarray((n, c, kh, kw, OH, OW), dtype=img.dtype)
+
+    for j in range(kh):
+        j_lim = j + sh * OH
+        for i in range(kw):
+            i_lim = i + sw * OW
+            col[:, :, j, i, :, :] = img[:, :, j:j_lim:sh, i:i_lim:sw]
+
+    if to_matrix:
+        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((n * OH * OW, -1))
+
+    return col
+
+
+def get_conv_outsize(input_size: int, kernel_size: int, stride: int, pad: int) -> int:
+    return (input_size + pad * 2 - kernel_size) // stride + 1

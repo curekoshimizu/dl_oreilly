@@ -6,8 +6,7 @@ from typing import Any, Iterator, Optional, Type
 
 import numpy as np
 
-from . import NDFloatArray
-from .function import linear
+from .function import im2col_array, linear
 from .graph import Graphviz
 from .protocol import Variable
 from .variable import Parameter
@@ -137,42 +136,12 @@ class Conv2d(Layer):
 
 def _conv2d(x: Variable, W: Variable, b: Variable, stride: int, pad: int) -> Variable:
     kh, kw = W.shape[2:]
-    col = _im2col_array(x.data, (kh, kw), stride, pad, to_matrix=False)
+    col = im2col_array(x.data, (kh, kw), stride, pad, to_matrix=False)
 
     y = np.tensordot(col.data, W.data, ((1, 2, 3), (1, 2, 3)))
     y += b.data
     y = np.rollaxis(y, 3, 1)
     return x.new_variable(y)
-
-
-def _im2col_array(
-    img: NDFloatArray, kernel_size: tuple[int, int], stride: int, pad: int, to_matrix: bool = True
-) -> NDFloatArray:
-
-    n, c, h, w = img.shape
-    kh, kw = kernel_size
-    sh, sw = (stride, stride)
-    ph, pw = (pad, pad)
-    OH = get_conv_outsize(h, kh, sh, ph)
-    OW = get_conv_outsize(w, kw, sw, pw)
-
-    img = np.pad(img, ((0, 0), (0, 0), (ph, ph + sh - 1), (pw, pw + sw - 1)), mode="constant", constant_values=(0,))
-    col: NDFloatArray = np.ndarray((n, c, kh, kw, OH, OW), dtype=img.dtype)
-
-    for j in range(kh):
-        j_lim = j + sh * OH
-        for i in range(kw):
-            i_lim = i + sw * OW
-            col[:, :, j, i, :, :] = img[:, :, j:j_lim:sh, i:i_lim:sw]
-
-    if to_matrix:
-        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((n * OH * OW, -1))
-
-    return col
-
-
-def get_conv_outsize(input_size: int, kernel_size: int, stride: int, pad: int) -> int:
-    return (input_size + pad * 2 - kernel_size) // stride + 1
 
 
 class Model(Layer):

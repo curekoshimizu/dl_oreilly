@@ -83,8 +83,8 @@ class MNIST(Dataset):
         test_files = {"target": "t10k-images-idx3-ubyte.gz", "label": "t10k-labels-idx1-ubyte.gz"}
 
         files = train_files if self._train else test_files
-        data_path = _get_file(url + files["target"])
-        label_path = _get_file(url + files["label"])
+        data_path = get_file(url + files["target"])
+        label_path = get_file(url + files["label"])
 
         data = self._load_data(str(data_path))
         label = self._load_label(str(label_path))
@@ -121,7 +121,7 @@ class MNIST(Dataset):
 _cache_dir = pathlib.Path.home() / ".dl"
 
 
-def _get_file(url: str, file_name: Optional[str] = None) -> pathlib.Path:
+def get_file(url: str, file_name: Optional[str] = None) -> pathlib.Path:
     if file_name is None:
         file_name = url[url.rfind("/") + 1 :]
     file_path = _cache_dir / file_name
