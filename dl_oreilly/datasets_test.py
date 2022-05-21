@@ -1,14 +1,16 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
+from . import NDFloatArray
 from .datasets import MNIST
 
-def _save_figure(x, save: bool) -> None:
+
+def _save_figure(x: NDFloatArray, save: bool) -> None:
     if not save:
         return
 
-    plt.imshow(x.reshape(28, 28), cmap="gray")
-    plt.axis("off")
+    plt.imshow(x.reshape(28, 28), cmap="gray")  # type:ignore
+    plt.axis("off")  # type:ignore
     plt.savefig("mnist.png")
 
 
