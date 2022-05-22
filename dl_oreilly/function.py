@@ -760,20 +760,20 @@ def im2col_array(
     kh, kw = kernel_size
     sh, sw = (stride, stride)
     ph, pw = (pad, pad)
-    OH = get_conv_outsize(h, kh, sh, ph)
-    OW = get_conv_outsize(w, kw, sw, pw)
+    oh = get_conv_outsize(h, kh, sh, ph)
+    ow = get_conv_outsize(w, kw, sw, pw)
 
     img = np.pad(img, ((0, 0), (0, 0), (ph, ph + sh - 1), (pw, pw + sw - 1)), mode="constant", constant_values=(0,))
-    col: NDFloatArray = np.ndarray((n, c, kh, kw, OH, OW), dtype=img.dtype)
+    col: NDFloatArray = np.ndarray((n, c, kh, kw, oh, ow), dtype=img.dtype)
 
     for j in range(kh):
-        j_lim = j + sh * OH
+        j_lim = j + sh * oh
         for i in range(kw):
-            i_lim = i + sw * OW
+            i_lim = i + sw * ow
             col[:, :, j, i, :, :] = img[:, :, j:j_lim:sh, i:i_lim:sw]
 
     if to_matrix:
-        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((n * OH * OW, -1))
+        col = col.transpose((0, 4, 5, 1, 2, 3)).reshape((n * oh * ow, -1))
 
     return col
 

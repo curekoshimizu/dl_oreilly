@@ -76,28 +76,64 @@ class VGG16(Model):
         self.load_weights(weights_path)
 
     def forward(self, x: Variable) -> Variable:
+        assert x.shape == (1, 3, 224, 224)
+
+        # (1, 3, 224, 224) -> (1, c=64, 224, 224)
         x = relu(self.conv1_1(x))
+        # (1, 64, 224, 224) -> (1, c=64, 224, 224)
         x = relu(self.conv1_2(x))
+        # (1, 64, 224, 224) -> (1, 64, 112, 112)
         x = pooling(x, 2, 2)
+        assert x.shape == (1, 64, 112, 112)
+
+        # (1, 64, 112, 112) -> (1, 128, 112, 112)
         x = relu(self.conv2_1(x))
+        # (1, 128, 112, 112) -> (1, 128, 112, 112)
         x = relu(self.conv2_2(x))
+        # (1, 128, 112, 112) -> (1, 128, 56, 56)
         x = pooling(x, 2, 2)
+
+        # (1, 128, 56, 56) -> (1, c=256, 56, 56)
         x = relu(self.conv3_1(x))
+        # (1, 256, 56, 56) -> (1, c=256, 56, 56)
         x = relu(self.conv3_2(x))
+        # (1, 256, 56, 56) -> (1, c=256, 56, 56)
         x = relu(self.conv3_3(x))
+        # (1, 256, 56, 56) -> (1, 256, h=28, w=28)
         x = pooling(x, 2, 2)
+        assert x.shape == (1, 256, 28, 28)
+
+        # (1, 256, 28, 28) -> (1, c=512, 28, 28)
         x = relu(self.conv4_1(x))
+        # (1, 512, 28, 28) -> (1, c=512, 28, 28)
         x = relu(self.conv4_2(x))
+        # (1, 512, 28, 28) -> (1, c=512, 28, 28)
         x = relu(self.conv4_3(x))
+        # (1, 512, 28, 28) -> (1, 512, h=14, w=14)
         x = pooling(x, 2, 2)
+        assert x.shape == (1, 512, 14, 14)
+
+        # (1, 512, 14, 14) -> (1, c=512, 14, 14)
         x = relu(self.conv5_1(x))
+        # (1, 512, 14, 14) -> (1, c=512, 14, 14)
         x = relu(self.conv5_2(x))
+        # (1, 512, 14, 14) -> (1, c=512, 14, 14)
         x = relu(self.conv5_3(x))
+        # (1, 512, 14, 14) -> (1, 512, h=7, w=7)
         x = pooling(x, 2, 2)
+        assert x.shape == (1, 512, 7, 7)
+
+        # (1, 512, 14, 14) -> (1, 512*7*7=25088)
         x = reshape(x, (x.shape[0], -1))
+        assert x.shape == (1, 25088)
+
+        # (1, 25088) -> (1, 4096)
         x = dropout(relu(self.fc6(x)))
+        # (1, 4096) -> (1, 4096)
         x = dropout(relu(self.fc7(x)))
+        # (1, 4096) -> (1, 1000)
         x = self.fc8(x)
+        assert x.shape == (1, 1000)
         return x
 
     @staticmethod

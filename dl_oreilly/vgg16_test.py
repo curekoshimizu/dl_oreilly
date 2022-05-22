@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from PIL import Image
 
 from .config import no_grad, use_test_mode
@@ -7,6 +8,7 @@ from .models import VGG16
 from .variable import Var
 
 
+@pytest.mark.heavy
 def test_vgg16() -> None:
     url = "https://github.com/oreilly-japan/deep-learning-from-scratch-3/raw/images/zebra.jpg"
     img_path = get_file(url)
@@ -23,5 +25,6 @@ def test_vgg16() -> None:
 
     index = int(np.argmax(y.data))
     labels = ImageNet.labels()
+    assert len(labels) == 1000
     assert index == 340
     assert labels[index] == "zebra"

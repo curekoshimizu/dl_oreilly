@@ -137,6 +137,7 @@ class Conv2d(Layer):
 
 def _conv2d(x: Variable, W: Variable, b: Variable, stride: int, pad: int) -> Variable:
     assert not Config.enable_backprop
+    assert x.ndim == 4
     kh, kw = W.shape[2:]
     col = im2col_array(x.data, (kh, kw), stride, pad, to_matrix=False)
 
