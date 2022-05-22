@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 
-from .config import use_test_mode
+from .config import no_grad, use_test_mode
 from .datasets import get_file
 from .models import VGG16
 from .variable import Var
@@ -18,7 +18,7 @@ def test_vgg16() -> None:
     assert x.shape == (1, 3, 224, 224)
 
     model = VGG16()
-    with use_test_mode():
+    with use_test_mode(), no_grad():
         y = model(Var(x))
 
     assert np.argmax(y.data) == 198

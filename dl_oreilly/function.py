@@ -734,6 +734,7 @@ def relu(x: Variable) -> Variable:
 
 
 def dropout(x: Variable, dropout_ratio: float = 0.5) -> Variable:
+    assert not Config.enable_backprop
     if Config.train:
         msk = np.random.rand(*x.shape) > dropout_ratio
         scale = np.array(1.0 - dropout_ratio).astype(x.dtype)
@@ -743,6 +744,7 @@ def dropout(x: Variable, dropout_ratio: float = 0.5) -> Variable:
 
 
 def pooling(x: Variable, kernel_size: int, stride: int = 1, pad: int = 0) -> Variable:
+    assert not Config.enable_backprop
     col = im2col_array(x.data, (kernel_size, kernel_size), stride, pad, to_matrix=False)
 
     n, c, kh, kw, oh, ow = col.shape

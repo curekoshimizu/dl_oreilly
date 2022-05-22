@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .config import use_test_mode
+from .config import no_grad, use_test_mode
 from .function import (
     Exp,
     Square,
@@ -488,14 +488,15 @@ def test_accuracy() -> None:
 
 
 def test_dropout() -> None:
-    n = 100
-    np.random.seed(0)
-    x = Var(np.ones(n))
-    y = dropout(x)
-    assert abs(y.sum().data[0] - n) < 5  # 5% error
-    with use_test_mode():
-        z = dropout(x)
-        assert np.all(z.data == x.data)
+    with no_grad():
+        n = 100
+        np.random.seed(0)
+        x = Var(np.ones(n))
+        y = dropout(x)
+        assert abs(y.sum().data[0] - n) < 5  # 5% error
+        with use_test_mode():
+            z = dropout(x)
+            assert np.all(z.data == x.data)
 
 
 def test_get_conv_outsize() -> None:

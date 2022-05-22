@@ -6,6 +6,7 @@ from typing import Any, Iterator, Optional, Type
 
 import numpy as np
 
+from .config import Config
 from .function import im2col_array, linear
 from .graph import Graphviz
 from .protocol import Variable
@@ -135,6 +136,7 @@ class Conv2d(Layer):
 
 
 def _conv2d(x: Variable, W: Variable, b: Variable, stride: int, pad: int) -> Variable:
+    assert not Config.enable_backprop
     kh, kw = W.shape[2:]
     col = im2col_array(x.data, (kh, kw), stride, pad, to_matrix=False)
 
