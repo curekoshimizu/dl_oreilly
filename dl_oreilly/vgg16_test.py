@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image
 
 from .config import no_grad, use_test_mode
-from .datasets import get_file
+from .datasets import ImageNet, get_file
 from .models import VGG16
 from .variable import Var
 
@@ -21,4 +21,9 @@ def test_vgg16() -> None:
     with use_test_mode(), no_grad():
         y = model(Var(x))
 
-    assert np.argmax(y.data) == 198
+    index = int(np.argmax(y.data))
+
+    labels = ImageNet.labels()
+    print(labels[index])
+
+    assert index == 198
