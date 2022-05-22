@@ -24,7 +24,7 @@ def enable_backprop(flag: bool) -> Iterator[None]:
 
 
 @contextlib.contextmanager
-def test_mode() -> Iterator[None]:
+def use_test_mode() -> Iterator[None]:
     old = Config.train
     Config.train = False
     try:

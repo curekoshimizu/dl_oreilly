@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import NDFloatArray
-from .config import test_mode
+from .config import use_test_mode
 from .function import (
     Exp,
     Square,
@@ -493,7 +493,7 @@ def test_dropout() -> None:
     x = Var(np.ones(n))
     y = dropout(x)
     assert abs(y.sum().data[0] - n) < 5  # 5% error
-    with test_mode():
+    with use_test_mode():
         z = dropout(x)
         assert np.all(z.data == x.data)
 
