@@ -22,8 +22,6 @@ def test_vgg16() -> None:
         y = model(Var(x))
 
     index = int(np.argmax(y.data))
-
     labels = ImageNet.labels()
-    print(labels[index])
-
-    assert index == 198
+    assert index == 340
+    assert labels[index] == "zebra"

@@ -130,3 +130,20 @@ class Var(Variable):
 
 class Parameter(Var):
     pass
+
+
+class LazyParameter(Parameter):
+    def __init__(self, name: str) -> None:
+        self._initialized = False
+        self._name = name
+        dummy_data = np.array([1])
+        super().__init__(dummy_data, self._name)
+        setattr(self, "_data", None)  # dummy data is overwritten by None (to avoid mypy)
+
+    @property
+    def initialized(self) -> bool:
+        return self._initialized or self.data is not None
+
+    def initialize(self, data: NDFloatArray) -> None:
+        assert not self.initialized
+        super().__init__(data, self._name)

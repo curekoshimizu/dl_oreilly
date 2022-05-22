@@ -10,7 +10,7 @@ from .config import Config
 from .function import im2col_array, linear
 from .graph import Graphviz
 from .protocol import Variable
-from .variable import Parameter
+from .variable import LazyParameter, Parameter
 
 
 class Layer(ABC):
@@ -81,7 +81,7 @@ class Linear(Layer):
         self._out_size = out_size
         self._dtype = dtype
 
-        self.W: Optional[Parameter] = None
+        self.W = LazyParameter(name="W")
         if nobias:
             self.b = None
         else:
@@ -90,10 +90,10 @@ class Linear(Layer):
 
     def _init_w(self, in_size: int) -> None:
         w_data = np.random.randn(in_size, self._out_size).astype(self._dtype) * np.sqrt(1 / in_size)
-        self.W = Parameter(w_data, name="W")
+        self.W.initialize(w_data)
 
     def forward(self, x: Variable) -> Variable:
-        if self.W is None:
+        if not self.W.initialized:
             self._init_w(x.shape[1])
         assert self.W is not None
 
@@ -117,7 +117,7 @@ class Conv2d(Layer):
         self._pad = pad
         self._dtype = dtype
 
-        self.W: Optional[Parameter] = None
+        self.W = LazyParameter(name="W")
         self.b = Parameter(np.zeros(out_channels, dtype=dtype), name="b")
 
     def _init_w(self, in_channels: int) -> None:
@@ -125,10 +125,10 @@ class Conv2d(Layer):
         kh, kw = (self._kernel_size, self._kernel_size)
         scale = np.sqrt(1 / (c * kh * kw))
         w_data = np.random.randn(oc, c, kh, kw).astype(self._dtype) * scale
-        self.W = Parameter(w_data, name="W")
+        self.W.initialize(w_data)
 
     def forward(self, x: Variable) -> Variable:
-        if self.W is None:
+        if not self.W.initialized:
             self._init_w(x.shape[1])
         assert self.W is not None
 
