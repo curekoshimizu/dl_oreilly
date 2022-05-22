@@ -17,6 +17,7 @@ pytest = "^6.2.1"
 ipdb = "^0.13.4"
 matplotlib = "^3.5.2"
 data-science-types = "^0.2.23"
+types-Pillow = "^9.0.15"
 
 [tool.black]
 line-length = 120

@@ -1,7 +1,9 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Type
 
 import numpy as np
+from PIL import Image
 
+from . import NDFloatArray
 from .datasets import get_file
 from .function import dropout, pooling, relu, reshape, sigmoid
 from .layers import Conv2d, Layer, Linear, Model
@@ -99,12 +101,16 @@ class VGG16(Model):
         return x
 
     @staticmethod
-    def preprocess(image, size=(224, 224), dtype=np.float32):
+    def preprocess(
+        image: Image.Image, size: tuple[int, int] = (224, 224), dtype: Type[np.float_] = np.float32
+    ) -> NDFloatArray:
         image = image.convert("RGB")
-        if size:
-            image = image.resize(size)
-        image = np.asarray(image, dtype=dtype)
-        image = image[:, :, ::-1]
-        image -= np.array([103.939, 116.779, 123.68], dtype=dtype)
-        image = image.transpose((2, 0, 1))
-        return image
+        image = image.resize(size)
+        img = np.asarray(image, dtype=dtype)
+        channel = img.shape[2]
+        assert img.shape == (size[0], size[1], channel)
+        img = img[:, :, ::-1]
+        img -= np.array([103.939, 116.779, 123.68], dtype=dtype)
+        img = img.transpose((2, 0, 1))
+        assert img.shape == (channel, size[0], size[1])
+        return img
