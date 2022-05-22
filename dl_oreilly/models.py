@@ -6,7 +6,7 @@ from PIL import Image
 from . import NDFloatArray
 from .datasets import get_file
 from .function import dropout, pooling, relu, reshape, sigmoid
-from .layers import Conv2d, Layer, Linear, Model
+from .layers import RNN, Conv2d, Layer, Linear, Model
 from .protocol import Variable
 
 
@@ -150,3 +150,18 @@ class VGG16(Model):
         img = img.transpose((2, 0, 1))
         assert img.shape == (channel, size[0], size[1])
         return img
+
+
+class SimpleRNN(Model):
+    def __init__(self, hidden_size: int, out_size: int) -> None:
+        super().__init__()
+        self._rnn = RNN(hidden_size)
+        self._fc = Linear(out_size)
+
+    def reset_state(self) -> None:
+        self._rnn.reset_state()
+
+    def forward(self, x: Variable) -> Variable:
+        h = self._rnn(x)
+        y = self._fc(h)
+        return y

@@ -7,7 +7,7 @@ from typing import Any, Iterator, Optional, Type
 import numpy as np
 
 from .config import Config
-from .function import im2col_array, linear
+from .function import im2col_array, linear, tanh
 from .graph import Graphviz
 from .protocol import Variable
 from .variable import LazyParameter, Parameter
@@ -145,6 +145,24 @@ def _conv2d(x: Variable, W: Variable, b: Variable, stride: int, pad: int) -> Var
     y += b.data
     y = np.rollaxis(y, 3, 1)
     return x.new_variable(y)
+
+
+class RNN(Layer):
+    def __init__(self, hidden_size: int) -> None:
+        self._x2h = Linear(out_size=hidden_size)
+        self._h2h = Linear(out_size=hidden_size)
+        self._h: Optional[Variable] = None
+
+    def reset_state(self) -> None:
+        self._h = None
+
+    def forward(self, x: Variable) -> Variable:
+        if self._h is None:
+            h_new = tanh(self._x2h(x))
+        else:
+            h_new = tanh(self._x2h(x) + self._h2h(self._h))
+        self._h = h_new
+        return h_new
 
 
 class Model(Layer):
