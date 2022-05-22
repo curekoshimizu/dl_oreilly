@@ -48,6 +48,19 @@ class Var(Variable):
                     y = f.output
                     y._set_grad(None)
 
+    def unchain_backward(self) -> None:
+        if self.creator is None:
+            return
+
+        funcs = [self.creator]
+        while len(funcs) > 0:
+            f = funcs.pop()
+            for x in f.inputs:
+                g = x.creator
+                if g is not None:
+                    funcs.append(g)
+                    x.unchain()
+
     def save_graph(self, path: Optional[pathlib.Path] = None) -> None:
         if path is None:
             name = self.name

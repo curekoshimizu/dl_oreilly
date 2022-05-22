@@ -84,6 +84,13 @@ class Variable(ABC):
         self._creator = f
         self._generation = f.generation + 1
 
+    def unchain(self) -> None:
+        self._creator = None
+
+    @abstractmethod
+    def unchain_backward(self) -> None:
+        ...
+
     @property
     def generation(self) -> int:
         return self._generation
