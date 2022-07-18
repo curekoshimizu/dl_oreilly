@@ -71,7 +71,7 @@ class Values:
                 print("None", end="\t")
                 y += 1
             y += 1
-            print(f"{value:.3}", end="\t")
+            print(f"{value:.2f}", end="\t")
         print("")
 
 
@@ -129,8 +129,6 @@ class GridWorld:
             return new_state
 
     def reward(self, state: State, action: Action, next_state: State) -> float:
-        if state == next_state:
-            return 0.0
         ret = self._reward_map[dataclasses.astuple(next_state)]
         assert isinstance(ret, float)
         return ret
