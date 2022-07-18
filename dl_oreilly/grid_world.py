@@ -3,7 +3,8 @@ from __future__ import annotations
 import dataclasses
 import enum
 import math
-from typing import Iterator
+from collections import defaultdict
+from typing import DefaultDict, Iterator
 
 import numpy as np
 
@@ -17,7 +18,11 @@ class Action(enum.Enum):
     RIGHT = 3
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(
+    order=True,
+    eq=True,
+    frozen=True,
+)
 class State:
     x: int
     y: int
@@ -32,6 +37,29 @@ class State:
                 return State(self.x, self.y - 1)
             case Action.RIGHT:
                 return State(self.x, self.y + 1)
+
+
+class Values:
+    def __init__(self) -> None:
+        self._values: DefaultDict[State, float] = defaultdict(float)
+
+    def update(self, state: State, value: float) -> None:
+        self._values[state] += value
+
+    def dump(self) -> None:
+        print("== values =======")
+        x = 0
+        y = 0
+        for key, value in sorted(self._values.items()):
+            if x != key.x:
+                print("")
+                x = key.x
+                y = 0
+            while y < key.y:
+                print("None", end="\t")
+                y += 1
+            y += 1
+            print(value, end="\t")
 
 
 class GridWorld:
