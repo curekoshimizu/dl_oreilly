@@ -39,3 +39,13 @@ def test_dp_actions() -> None:
     env = GridWorld()
     action_probs = dp.policy_iter(env)
     action_probs.dump()
+
+
+def test_dp_complete_code() -> None:
+    values = Values()
+    env = GridWorld()
+    dp = DPMethod()
+    values = dp.value_iter(values, env)
+    values.dump()
+    action_probs = dp.greedy_policy(values, env)
+    action_probs.dump()

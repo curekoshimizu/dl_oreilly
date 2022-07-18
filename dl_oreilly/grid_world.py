@@ -211,7 +211,7 @@ class DPMethod:
                 r = env.reward(state, action, next_state)
                 value = r + gamma * values.get(next_state)
                 action_values.append((action, value))
-            max_action, _ = sorted(action_values, key=lambda x: x[1])[3]
+            max_action, _ = sorted(action_values, key=lambda x: -x[1])[0]
 
             action_prob = [
                 (Action.UP, 0.0),
@@ -222,6 +222,27 @@ class DPMethod:
             action_prob[max_action.value] = (max_action, 1.0)
             action_probs.set_pi(state, action_prob)
         return action_probs
+
+    def value_iter(
+        self,
+        values: Values,
+        env: GridWorld,
+        gamma: float = 0.9,
+        threshold: float = 0.001,
+        n_iter: int = 10000,
+    ) -> Values:
+        for _ in range(n_iter):
+            old_values = values.copy()
+            new_value = self.value_iter_onestep(values, env, gamma)
+
+            delta = 0.0
+            for state in values.keys():
+                t = abs(old_values.get(state) - new_value.get(state))
+                if delta < t:
+                    delta = t
+            if delta < threshold:
+                break
+        return new_value
 
     def policy_eval(
         self,
@@ -263,4 +284,24 @@ class DPMethod:
                 r = env.reward(state, action, next_state)
                 new_value += action_prob * (r + gamma * values.get(next_state))
             values.set(state, new_value)
+        return values
+
+    def value_iter_onestep(
+        self,
+        values: Values,
+        env: GridWorld,
+        gamma: float = 0.9,
+    ) -> Values:
+        for state in env.states():
+            if state == env.goal_state:
+                values.set(state, 0.0)
+                continue
+
+            action_values = []
+            for action in env.actions():
+                next_state = env.next_state(state, action)
+                r = env.reward(state, action, next_state)
+                value = r + gamma * values.get(next_state)
+                action_values.append(value)
+            values.set(state, max(action_values))
         return values
