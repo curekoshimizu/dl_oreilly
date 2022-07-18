@@ -43,8 +43,17 @@ class Values:
     def __init__(self) -> None:
         self._values: DefaultDict[State, float] = defaultdict(float)
 
+    def copy(self) -> Values:
+        return dataclasses.replace(self)
+
+    def keys(self) -> Iterator[State]:
+        yield from self._values.keys()
+
     def update(self, state: State, value: float) -> None:
         self._values[state] += value
+
+    def get(self, state: State) -> float:
+        return self._values[state]
 
     def dump(self) -> None:
         print("== values =======")
@@ -77,7 +86,7 @@ class GridWorld:
                 [0.0, 0.0, 0.0, 0.0],
             ]
         )
-        self._goal_state = State(0, 3)
+        self.goal_state = State(0, 3)
         self._wall_state = State(1, 1)
         self._start_state = State(2, 0)
         self._agent_state = self._start_state
@@ -116,6 +125,58 @@ class GridWorld:
             return new_state
 
     def reward(self, state: State, action: Action, next_state: State) -> float:
+        if state == next_state:
+            return 0.0
         ret = self._reward_map[dataclasses.astuple(next_state)]
         assert isinstance(ret, float)
         return ret
+
+
+class Actions:
+    """
+    pi(a|s) を返すためのクラス
+    """
+
+    def pi(self, state: State) -> list[tuple[Action, float]]:
+        """
+        (a: Action, pi(a|s)) を返す
+        """
+        return [(Action.UP, 0.25), (Action.DOWN, 0.25), (Action.LEFT, 0.25), (Action.RIGHT, 0.25)]
+
+
+class DPMethod:
+    def policy_eval(
+        self, actions: Actions, values: Values, env: GridWorld, gamma: float = 0.9, threshold: float = 0.001
+    ) -> Values:
+        while True:
+            old_values = values.copy()
+            new_value = self.eval_onestep(actions, values, env, gamma)
+
+            delta = 0.0
+            for state in values.keys():
+                t = abs(old_values.get(state) - new_value.get(state))
+                if delta < t:
+                    delta = t
+            if delta < threshold:
+                break
+        return new_value
+
+    def eval_onestep(
+        self,
+        actions: Actions,
+        values: Values,
+        env: GridWorld,
+        gamma: float = 0.9,
+    ) -> Values:
+        for state in env.states():
+            if state == env.goal_state:
+                values.update(state, 0.0)
+                continue
+
+            new_value = 0.0
+            for (action, action_prob) in actions.pi(state):
+                next_state = env.next_state(state, action)
+                r = env.reward(state, action, next_state)
+                new_value += action_prob * (r + gamma * values.get(next_state))
+            values.update(state, new_value)
+        return values
