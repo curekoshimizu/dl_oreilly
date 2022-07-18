@@ -4,7 +4,7 @@ import dataclasses
 import enum
 import math
 from collections import defaultdict
-from typing import DefaultDict, Iterator
+from typing import Any, DefaultDict, Iterable
 
 import numpy as np
 
@@ -49,7 +49,7 @@ class Values:
             new.set(state, self.get(state))
         return new
 
-    def keys(self) -> Iterator[State]:
+    def keys(self) -> Iterable[State]:
         yield from self._values.keys()
 
     def set(self, state: State, value: float) -> None:
@@ -111,7 +111,7 @@ class GridWorld:
     def actions(self) -> list[Action]:
         return self._action_space
 
-    def states(self) -> Iterator[State]:
+    def states(self) -> Iterable[State]:
         for x in range(self.height):
             for y in range(self.width):
                 ret = State(x, y)
@@ -157,11 +157,75 @@ class ActionProbs:
         """
         return self._pi[state]
 
+    def keys(self) -> Iterable[State]:
+        return self._pi.keys()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, ActionProbs):
+            return False
+
+        if list(self.keys()) != list(other.keys()):
+            return False
+        for key in self.keys():
+            if self.pi(key) != other.pi(key):
+                return False
+        return True
+
+    def dump(self) -> None:
+        print("== values =======")
+        x = 0
+        y = 0
+        for key, action_probs in sorted(self._pi.items()):
+            if x != key.x:
+                print("")
+                x = key.x
+                y = 0
+            while y < key.y:
+                print("None", end="\t")
+                y += 1
+            y += 1
+            max_action, _ = sorted(action_probs, key=lambda x: -x[1])[0]
+            print(f"{str(max_action)[7:]}", end="\t")
+        print("")
+
 
 class DPMethod:
+    def policy_iter(self, env: GridWorld, gamma: float = 0.9) -> ActionProbs:
+        action_probs = ActionProbs()
+        values = Values()
+
+        while True:
+            values = self.policy_eval(action_probs, values, env, gamma)
+            new_action_probs = self.greedy_policy(values, env, gamma)
+            if new_action_probs == action_probs:
+                break
+            action_probs = new_action_probs
+        return action_probs
+
+    def greedy_policy(self, values: Values, env: GridWorld, gamma: float = 0.9) -> ActionProbs:
+        action_probs = ActionProbs()
+        for state in env.states():
+            action_values = []
+            for action in env.actions():
+                next_state = env.next_state(state, action)
+                r = env.reward(state, action, next_state)
+                value = r + gamma * values.get(next_state)
+                action_values.append((action, value))
+            max_action, _ = sorted(action_values, key=lambda x: x[1])[3]
+
+            action_prob = [
+                (Action.UP, 0.0),
+                (Action.DOWN, 0.0),
+                (Action.LEFT, 0.0),
+                (Action.RIGHT, 0.0),
+            ]
+            action_prob[max_action.value] = (max_action, 1.0)
+            action_probs.set_pi(state, action_prob)
+        return action_probs
+
     def policy_eval(
         self,
-        actions: ActionProbs,
+        action_probs: ActionProbs,
         values: Values,
         env: GridWorld,
         gamma: float = 0.9,
@@ -170,7 +234,7 @@ class DPMethod:
     ) -> Values:
         for _ in range(n_iter):
             old_values = values.copy()
-            new_value = self.eval_onestep(actions, values, env, gamma)
+            new_value = self.eval_onestep(action_probs, values, env, gamma)
 
             delta = 0.0
             for state in values.keys():
@@ -183,7 +247,7 @@ class DPMethod:
 
     def eval_onestep(
         self,
-        actions: ActionProbs,
+        action_probs: ActionProbs,
         values: Values,
         env: GridWorld,
         gamma: float = 0.9,
@@ -194,7 +258,7 @@ class DPMethod:
                 continue
 
             new_value = 0.0
-            for (action, action_prob) in actions.pi(state):
+            for (action, action_prob) in action_probs.pi(state):
                 next_state = env.next_state(state, action)
                 r = env.reward(state, action, next_state)
                 new_value += action_prob * (r + gamma * values.get(next_state))

@@ -32,3 +32,10 @@ def test_dp_full() -> None:
 
     new_value = dp.policy_eval(actions, values, env)
     new_value.dump()
+
+
+def test_dp_actions() -> None:
+    dp = DPMethod()
+    env = GridWorld()
+    action_probs = dp.policy_iter(env)
+    action_probs.dump()
