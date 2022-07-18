@@ -44,13 +44,16 @@ class Values:
         self._values: DefaultDict[State, float] = defaultdict(float)
 
     def copy(self) -> Values:
-        return dataclasses.replace(self)
+        new = Values()
+        for state in self.keys():
+            new.set(state, self.get(state))
+        return new
 
     def keys(self) -> Iterator[State]:
         yield from self._values.keys()
 
-    def update(self, state: State, value: float) -> None:
-        self._values[state] += value
+    def set(self, state: State, value: float) -> None:
+        self._values[state] = value
 
     def get(self, state: State) -> float:
         return self._values[state]
@@ -68,7 +71,8 @@ class Values:
                 print("None", end="\t")
                 y += 1
             y += 1
-            print(value, end="\t")
+            print(f"{value:.3}", end="\t")
+        print("")
 
 
 class GridWorld:
@@ -146,9 +150,15 @@ class Actions:
 
 class DPMethod:
     def policy_eval(
-        self, actions: Actions, values: Values, env: GridWorld, gamma: float = 0.9, threshold: float = 0.001
+        self,
+        actions: Actions,
+        values: Values,
+        env: GridWorld,
+        gamma: float = 0.9,
+        threshold: float = 0.001,
+        n_iter: int = 10000,
     ) -> Values:
-        while True:
+        for _ in range(n_iter):
             old_values = values.copy()
             new_value = self.eval_onestep(actions, values, env, gamma)
 
@@ -170,7 +180,7 @@ class DPMethod:
     ) -> Values:
         for state in env.states():
             if state == env.goal_state:
-                values.update(state, 0.0)
+                values.set(state, 0.0)
                 continue
 
             new_value = 0.0
@@ -178,5 +188,5 @@ class DPMethod:
                 next_state = env.next_state(state, action)
                 r = env.reward(state, action, next_state)
                 new_value += action_prob * (r + gamma * values.get(next_state))
-            values.update(state, new_value)
+            values.set(state, new_value)
         return values
