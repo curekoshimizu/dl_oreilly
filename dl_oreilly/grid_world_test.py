@@ -1,6 +1,6 @@
 import numpy as np
 
-from .grid_world import Actions, DPMethod, GridWorld, State, Values
+from .grid_world import ActionProbs, DPMethod, GridWorld, State, Values
 
 
 def test_values_dump() -> None:
@@ -12,7 +12,7 @@ def test_values_dump() -> None:
 
 
 def test_dp_one_time() -> None:
-    actions = Actions()
+    actions = ActionProbs()
     dp = DPMethod()
     values = Values()
     env = GridWorld()
@@ -25,7 +25,7 @@ def test_dp_one_time() -> None:
 
 
 def test_dp_full() -> None:
-    actions = Actions()
+    actions = ActionProbs()
     dp = DPMethod()
     values = Values()
     env = GridWorld()

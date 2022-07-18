@@ -134,22 +134,34 @@ class GridWorld:
         return ret
 
 
-class Actions:
+class ActionProbs:
     """
     pi(a|s) を返すためのクラス
     """
+
+    def __init__(self) -> None:
+        init: list[tuple[Action, float]] = [
+            (Action.UP, 0.25),
+            (Action.DOWN, 0.25),
+            (Action.LEFT, 0.25),
+            (Action.RIGHT, 0.25),
+        ]
+        self._pi: DefaultDict[State, list[tuple[Action, float]]] = defaultdict(lambda: init)
+
+    def set_pi(self, state: State, action_prob: list[tuple[Action, float]]) -> None:
+        self._pi[state] = action_prob
 
     def pi(self, state: State) -> list[tuple[Action, float]]:
         """
         (a: Action, pi(a|s)) を返す
         """
-        return [(Action.UP, 0.25), (Action.DOWN, 0.25), (Action.LEFT, 0.25), (Action.RIGHT, 0.25)]
+        return self._pi[state]
 
 
 class DPMethod:
     def policy_eval(
         self,
-        actions: Actions,
+        actions: ActionProbs,
         values: Values,
         env: GridWorld,
         gamma: float = 0.9,
@@ -171,7 +183,7 @@ class DPMethod:
 
     def eval_onestep(
         self,
-        actions: Actions,
+        actions: ActionProbs,
         values: Values,
         env: GridWorld,
         gamma: float = 0.9,
